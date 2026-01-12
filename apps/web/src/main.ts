@@ -31,6 +31,12 @@ request.onTokenRefreshed(newToken => {
   authStore.setToken(newToken)
 })
 
+// 应用启动时验证 token 并刷新用户信息
+const authStore = useAuthStore()
+if (authStore.isAuthenticated) {
+  authStore.fetchUser()
+}
+
 const settingsStore = useSettingsStore()
 const websiteStore = useWebsiteStore()
 const categoryStore = useCategoryStore()

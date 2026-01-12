@@ -194,7 +194,6 @@ const handleClickOutside = (event: Event) => {
 }
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  authStore.fetchUser()
 })
 onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>

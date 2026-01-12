@@ -25,7 +25,7 @@ services:
         limits:
           # 资源限制：防止单容器耗尽宿主机资源
           cpus: '0.50' # 限制使用 0.5 个 CPU 核
-          memory: 512M # 限制使用 512MB 内存
+          memory: 64M # Nginx 静态服务，极轻量
     logging:
       # 日志配置：防止日志文件无限增长导致磁盘爆满
       driver: 'json-file'
@@ -59,7 +59,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 512M
+          memory: 128M # 实际使用约40MB，预甙3倍余量
     logging:
       driver: 'json-file'
       options:
@@ -69,9 +69,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
-      # 健康检查：访问 /healthz 接口
+      # 健康检查：访问 /healthz 接口（使用 127.0.0.1 避免 IPv6 解析问题）
       test:
-        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:8787/healthz']
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:8787/healthz']
       interval: 30s
       timeout: 10s
       retries: 3

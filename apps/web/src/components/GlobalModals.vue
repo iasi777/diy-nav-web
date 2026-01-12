@@ -15,17 +15,6 @@
       @keep-local="websiteStore.ignoreCloudData"
     />
   </BaseModal>
-
-  <!-- Data Management Modal -->
-  <BaseModal
-    v-if="uiStore.modalState.dataManagement"
-    :is-open="uiStore.modalState.dataManagement"
-    title="数据管理"
-    size="lg"
-    @close="() => uiStore.closeModal('dataManagement')"
-  >
-    <DataManagementModal @close="() => uiStore.closeModal('dataManagement')" />
-  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -33,7 +22,6 @@ import { useUIStore } from '@/stores/ui'
 import { useWebsiteStore } from '@/stores/website'
 import { BaseModal } from '@nav/ui'
 import SyncConflictModal from '@/components/modals/SyncConflictModal.vue'
-import DataManagementModal from '@/components/modals/DataManagementModal.vue'
 
 const uiStore = useUIStore()
 const websiteStore = useWebsiteStore()

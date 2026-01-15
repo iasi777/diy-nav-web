@@ -11,7 +11,12 @@ import iconRoutes from './src/routes/icon.js'
 import backupRoutes from './src/routes/backup.js'
 import authRoutes from './src/routes/auth.route.js'
 import aiRoutes from './src/routes/ai.route.js'
-import { authProviderPlugin, LinuxDoProvider } from '@nav/auth-providers'
+import {
+  authProviderPlugin,
+  LinuxDoProvider,
+  GitHubProvider,
+  GoogleProvider
+} from '@nav/auth-providers'
 import { httpClient } from './src/lib/http.js'
 import authRenewalPlugin from './src/plugins/auth-renewal.js'
 import jwt from '@fastify/jwt'
@@ -117,13 +122,38 @@ await app.register(backupRoutes, { prefix: '/api' })
 await app.register(authProviderPlugin)
 
 // Register OAuth Strategies (DI)
-const { linuxDo } = config.auth
+const { linuxDo, github, google } = config.auth
+
 if (linuxDo.clientId && linuxDo.clientSecret && linuxDo.redirectUri) {
   const provider = new LinuxDoProvider(
     {
       clientId: linuxDo.clientId,
       clientSecret: linuxDo.clientSecret,
       redirectUri: linuxDo.redirectUri
+    },
+    httpClient
+  )
+  app.authProviderFactory.register(provider)
+}
+
+if (github.clientId && github.clientSecret) {
+  const provider = new GitHubProvider(
+    {
+      clientId: github.clientId,
+      clientSecret: github.clientSecret,
+      redirectUri: github.redirectUri || ''
+    },
+    httpClient
+  )
+  app.authProviderFactory.register(provider)
+}
+
+if (google.clientId && google.clientSecret && google.redirectUri) {
+  const provider = new GoogleProvider(
+    {
+      clientId: google.clientId,
+      clientSecret: google.clientSecret,
+      redirectUri: google.redirectUri
     },
     httpClient
   )

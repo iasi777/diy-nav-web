@@ -19,9 +19,18 @@ export const serverSchema = z.object({
 // ============================================
 export const authSchema = z.object({
   JWT_SECRET: z.string().default('dev-secret-do-not-use-in-prod'),
+  // Linux.do
   LINUX_DO_CLIENT_ID: z.string().optional(),
   LINUX_DO_CLIENT_SECRET: z.string().optional(),
-  LINUX_DO_REDIRECT_URI: z.string().optional()
+  LINUX_DO_REDIRECT_URI: z.string().optional(),
+  // GitHub
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  GITHUB_REDIRECT_URI: z.string().optional(),
+  // Google
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional()
 })
 
 // ============================================

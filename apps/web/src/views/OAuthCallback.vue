@@ -58,6 +58,7 @@ onMounted(async () => {
   const code = route.query.code as string
   const state = route.query.state as string
   const storedState = localStorage.getItem('oauth_state')
+  const storedProvider = localStorage.getItem('oauth_provider') || 'linuxdo'
 
   // Artificial delay for smoother UX
   await new Promise(resolve => setTimeout(resolve, 800))
@@ -69,6 +70,7 @@ onMounted(async () => {
   }
 
   localStorage.removeItem('oauth_state')
+  localStorage.removeItem('oauth_provider')
 
   if (!code) {
     errorState.value = '授权回调异常: 未能获取授权码'
@@ -76,7 +78,7 @@ onMounted(async () => {
   }
 
   try {
-    await authStore.loginWithProvider('linuxdo', code)
+    await authStore.loginWithProvider(storedProvider, code)
 
     uiStore.showToast('欢迎回来', 'success')
     router.replace('/')

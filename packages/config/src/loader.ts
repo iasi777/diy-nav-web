@@ -103,6 +103,16 @@ export function getConfig() {
         clientId: raw.LINUX_DO_CLIENT_ID,
         clientSecret: raw.LINUX_DO_CLIENT_SECRET,
         redirectUri: raw.LINUX_DO_REDIRECT_URI
+      },
+      github: {
+        clientId: raw.GITHUB_CLIENT_ID,
+        clientSecret: raw.GITHUB_CLIENT_SECRET,
+        redirectUri: raw.GITHUB_REDIRECT_URI
+      },
+      google: {
+        clientId: raw.GOOGLE_CLIENT_ID,
+        clientSecret: raw.GOOGLE_CLIENT_SECRET,
+        redirectUri: raw.GOOGLE_REDIRECT_URI
       }
     },
     storage: {

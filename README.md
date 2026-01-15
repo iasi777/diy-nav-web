@@ -5,13 +5,13 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3.0-green)](https://vuejs.org/)
 [![Fastify](https://img.shields.io/badge/Fastify-4.0-black)](https://www.fastify.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Demo](https://img.shields.io/badge/Demo-Online-orange)](https://demo-nav.fpic.top)
+[![web](https://img.shields.io/badge/Web-Online-orange)](https://1ddh.cn)
 
 > **轻量、极速、可定制的现代化个人导航管理平台。**
 >
 > _A lightweight, fast, and customizable modern personal navigation management platform._
 >
-> 🔗 **在线演示**: [https://demo-nav.fpic.top](https://demo-nav.fpic.top)（暂未配置API服务故登录、云备份、AI助手功能不可用，完整功能体验可本地启动查看效果）
+> 🔗 **在线演示**: [https://1ddh.cn](https://1ddh.cn)
 
 ---
 
@@ -130,10 +130,18 @@ pnpm install
     | `AI_OPENAI_BASE_URL`           |   否   | 自定义 API 地址（如使用 Claude/通义千问等）           |
     | `AI_OPENAI_MODEL`              |   否   | 模型名称，默认 `gpt-4o-mini`                          |
     | **第三方登录 (OAuth)**         |        |                                                       |
-    | `VITE_LINUX_DO_CLIENT_ID`      |   否   | Linux Do 第三方登录 Client ID (前端可见)              |
-    | `LINUX_DO_CLIENT_ID`           |   否   | Linux Do 第三方登录 Client ID (后端使用)              |
-    | `LINUX_DO_CLIENT_SECRET`       |   否   | Linux Do 第三方登录 Secret (后端专用)                 |
+    | `VITE_LINUX_DO_CLIENT_ID`      |   否   | Linux Do OAuth Client ID (前端)                       |
+    | `LINUX_DO_CLIENT_ID`           |   否   | Linux Do OAuth Client ID (后端)                       |
+    | `LINUX_DO_CLIENT_SECRET`       |   否   | Linux Do OAuth Secret (后端)                          |
     | `LINUX_DO_REDIRECT_URI`        |   否   | Linux Do OAuth 回调地址                               |
+    | `VITE_GITHUB_CLIENT_ID`        |   否   | GitHub OAuth Client ID (前端)                         |
+    | `GITHUB_CLIENT_ID`             |   否   | GitHub OAuth Client ID (后端)                         |
+    | `GITHUB_CLIENT_SECRET`         |   否   | GitHub OAuth Secret (后端)                            |
+    | `GITHUB_REDIRECT_URI`          |   否   | GitHub OAuth 回调地址                                 |
+    | `VITE_GOOGLE_CLIENT_ID`        |   否   | Google OAuth Client ID (前端)                         |
+    | `GOOGLE_CLIENT_ID`             |   否   | Google OAuth Client ID (后端)                         |
+    | `GOOGLE_CLIENT_SECRET`         |   否   | Google OAuth Secret (后端)                            |
+    | `GOOGLE_REDIRECT_URI`          |   否   | Google OAuth 回调地址                                 |
 
     > ⚠️ **注意**: `packages` 目录下的内部包构建依赖完整的环境配置，如果配置不完整可能会导致部分功能异常。
 
@@ -193,7 +201,7 @@ pnpm build
 - [x] Cloudflare R2 云端备份
 - [x] WebDAV 备份支持（坚果云、Nextcloud 等）
 - [x] 多用户系统（注册/登录）
-- [x] 第三方登录（Linuxdo）
+- [x] 第三方登录（Linuxdo / GitHub / Google）
 - [x] Docker 容器化部署
 - [x] **AI 智能助手**
   - 自然语言管理网站、分类、标签、数据备份
@@ -204,7 +212,6 @@ pnpm build
 
 - [ ] AWS S3 存储支持
 - [ ] 自定义AI服务商（支持多 Provider 配置持久化）
-- [ ] 更多 OAuth 提供商登录（GitHub / Google）
 - [ ] 快捷键支持
 - [ ] 首页小组件（可拖拽自定义布局）
 - [ ] 网站健康检测（自动检查链接有效性）

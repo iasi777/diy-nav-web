@@ -420,19 +420,8 @@ const handleRegister = async () => {
 }
 </script>
 
-<style scoped>
-:root {
-  --bg-page: #f3f4f8;
-  --bg-card: #fff;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --text-main: #111827;
-  --text-sub: #6b7280;
-  --border: #e5e7eb;
-  --input-bg: #f9fafb;
-  --radius-card: 26px;
-  --radius-input: 999px;
-}
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
 
 * {
   box-sizing: border-box;
@@ -440,27 +429,27 @@ const handleRegister = async () => {
   padding: 0;
 }
 
-/* Layout handled by AuthLayout and BrandLogo */
-
 .logo-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 /* 登录 / 注册视图容器 */
 .auth-views {
   position: relative;
   min-height: 560px;
-  width: 100%; /* Fix: Prevent collapse in flex column */
+  width: 100%;
 }
+
 .view {
   position: absolute;
   inset: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--transition-normal);
 }
+
 .view.active {
   opacity: 1;
   pointer-events: auto;
@@ -468,57 +457,62 @@ const handleRegister = async () => {
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: var(--spacing-2xl);
 }
+
 .header-title {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.02em;
-  margin-bottom: 8px;
-  color: var(--text-main, #111827);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-main);
 }
+
 .header-sub {
-  font-size: 14px;
-  color: var(--text-secondary, #6b7280);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: var(--spacing-lg);
 }
+
 .form-label {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-main, #374151);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-main);
   display: inline-flex;
   align-items: center;
 }
+
 .form-label span {
-  color: var(--color-error, #ef4444);
-  margin-left: 4px;
+  color: var(--color-error);
+  margin-left: var(--spacing-xs);
 }
 
 .input-wrap {
   height: 48px;
-  border-radius: 999px; /* var(--radius-input) */
-  border: 1px solid var(--border, #e5e7eb);
-  background: var(--bg-tile, #f9fafb);
-  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--bg-tile);
+  padding: 0 var(--spacing-lg);
   display: flex;
   align-items: center;
-  transition: 0.2s;
+  transition: all var(--transition-fast);
 }
+
 .input-wrap:focus-within {
-  border-color: var(--color-primary, #2563eb);
-  background: var(--bg-tile-hover, #fff);
+  border-color: var(--color-primary);
+  background: var(--bg-tile-hover);
   box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
 }
 
 .input-icon {
   width: 18px;
   height: 18px;
-  margin-right: 10px;
-  stroke: var(--text-muted, #9ca3af);
+  margin-right: var(--spacing-md);
+  stroke: var(--text-muted);
   stroke-width: 1.8;
   fill: none;
 }
@@ -527,13 +521,14 @@ input {
   flex: 1;
   border: none;
   background: none;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   outline: none;
-  color: var(--text-main, #111827);
-  width: 100%; /* Ensure input takes full width */
+  color: var(--text-main);
+  width: 100%;
 }
+
 input::placeholder {
-  color: var(--text-muted, #c1c7d5);
+  color: var(--text-muted);
 }
 
 .toggle-password {
@@ -541,64 +536,70 @@ input::placeholder {
   border: none;
   cursor: pointer;
   padding: 0;
-  display: flex; /* Center icon */
+  display: flex;
   align-items: center;
 }
+
 .eye-icon {
   width: 18px;
   height: 18px;
-  stroke: var(--text-muted, #9ca3af);
+  stroke: var(--text-muted);
   stroke-width: 1.8;
   fill: none;
 }
 
 .btn-primary {
-  margin-top: 16px;
+  margin-top: var(--spacing-xl);
   width: 100%;
   height: 50px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: none;
-  background: var(--color-primary, #2563eb);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   box-shadow: 0 20px 36px rgba(37, 99, 235, 0.45);
-  transition: 0.15s ease;
+  transition: all var(--transition-fast);
 }
+
 .btn-primary:hover {
-  background: var(--color-primary-dark, #1d4ed8);
+  background: var(--color-primary-dark);
 }
+
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
 .row-helper {
-  margin-top: 10px;
+  margin-top: var(--spacing-md);
   text-align: right;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
+
 .row-helper a {
-  color: var(--color-primary, #2563eb);
+  color: var(--color-primary);
   text-decoration: none;
 }
 
 .divider {
   display: flex;
   align-items: center;
-  margin: 24px 0 16px;
-  font-size: 12px;
-  color: var(--text-muted, #9ca3af);
+  margin: var(--spacing-2xl) 0 var(--spacing-xl);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
+
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--border, #e5e7eb);
+  border-bottom: 1px solid var(--color-border);
 }
+
 .divider span {
-  margin: 0 10px;
+  margin: 0 var(--spacing-md);
   white-space: nowrap;
 }
 
@@ -606,67 +607,71 @@ input::placeholder {
 .social-row {
   display: flex;
   justify-content: center;
-  gap: 14px;
+  gap: var(--spacing-lg);
 }
+
 .social-btn {
   width: 40px;
   height: 40px;
-  border-radius: 999px;
-  border: 1px solid var(--border, #e5e7eb);
-  background: var(--bg-tile, #f9fafb);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--bg-tile);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: 0.15s;
+  transition: all var(--transition-fast);
 }
+
 .social-btn:hover {
-  background: var(--bg-tile-hover, #eef2ff);
-  border-color: var(--color-primary-soft, #c7d2fe);
+  background: var(--bg-tile-hover);
+  border-color: var(--primary-soft);
 }
+
 .social-icon {
   width: 20px;
   height: 20px;
   display: block;
 }
-/* Ensure svg stroke follows theme if set, but some social icons are hardcoded colors usually */
 
 .switch-row {
-  margin-top: 22px;
+  margin-top: var(--spacing-xl);
   text-align: center;
-  font-size: 14px;
-  color: var(--text-secondary, #6b7280);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
+
 .switch-row a {
-  color: var(--color-primary, #2563eb);
-  font-weight: 500;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  margin-left: 4px;
+  margin-left: var(--spacing-xs);
 }
 
 .legal {
-  margin-top: 14px;
+  margin-top: var(--spacing-lg);
   text-align: center;
-  font-size: 12px;
-  color: var(--text-muted, #9ca3af);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
+
 .legal a {
-  color: var(--text-muted, #9ca3af);
+  color: var(--text-muted);
   text-decoration: underline;
 }
 
 .error-text {
-  color: var(--color-error, #ef4444);
-  font-size: 12px;
-  margin-top: 4px;
-  margin-left: 4px;
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-xs);
+  margin-left: var(--spacing-xs);
 }
 
-/* Specific Dark Mode overrides if variables aren't catching everything correctly */
+/* Dark Mode overrides */
 :global([data-theme='dark']) .social-icon polyline,
 :global([data-theme='dark']) .social-icon line,
 :global([data-theme='dark']) .social-icon path[fill='#111827'] {
-  stroke: #e2e8f0;
-  fill: #e2e8f0;
+  stroke: var(--text-main);
+  fill: var(--text-main);
 }
 </style>

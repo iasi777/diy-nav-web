@@ -58,34 +58,34 @@ const message = computed(() => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 2rem;
-  padding: 4rem 2rem;
-  color: var(--color-neutral-600);
+  gap: $spacing-2xl;
+  padding: $spacing-2xl * 2 $spacing-2xl;
+  color: $color-neutral-600;
   text-align: center;
   max-width: 600px;
   margin: 0 auto;
 
   &.size-small {
-    gap: 1rem;
-    padding: 2rem 1rem;
+    gap: $spacing-xl;
+    padding: $spacing-2xl $spacing-xl;
 
     .default-icon-bg {
       width: 80px;
       height: 80px;
-      border-radius: 24px;
+      border-radius: $border-radius-2xl;
       font-size: 32px;
 
       &::after {
-        border-radius: 18px;
+        border-radius: $border-radius-lg;
       }
     }
 
     .empty-title {
-      font-size: 18px;
+      font-size: $font-size-lg;
     }
 
     .empty-desc {
-      font-size: 14px;
+      font-size: $font-size-sm;
     }
   }
 }
@@ -100,15 +100,13 @@ const message = computed(() => {
   width: 120px;
   height: 120px;
   border-radius: 40px;
-  background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+  background: linear-gradient(135deg, #e0e7ff 0%, $color-neutral-100 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
   color: #818cf8;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.05),
-    0 10px 10px -5px rgba(0, 0, 0, 0.01);
+  box-shadow: $shadow-lg;
   position: relative;
 
   &::after {
@@ -116,7 +114,7 @@ const message = computed(() => {
     position: absolute;
     width: 80%;
     height: 80%;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba($color-white, 0.5);
     border-radius: 30px;
     top: 50%;
     left: 50%;
@@ -133,32 +131,32 @@ const message = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: $spacing-xl;
 }
 
 .empty-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-neutral-800;
   margin: 0;
 }
 
 .empty-desc {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1.6;
+  font-size: $font-size-base;
+  color: $color-neutral-600;
+  line-height: $line-height-relaxed;
   max-width: 480px;
   margin: 0;
 }
 
 .empty-actions {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: $spacing-xl;
+  margin-bottom: $spacing-xl;
 }
 
 .empty-hint {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 1rem;
+  font-size: $font-size-sm;
+  color: $color-neutral-500;
+  margin-top: $spacing-xl;
 }
 </style>

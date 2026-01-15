@@ -321,7 +321,7 @@ setupFaviconObserver()
 .website-card {
   position: relative;
   background-color: var(--bg-card);
-  border-radius: 12px; // Reduced radius
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-tile);
   height: 100%;
   display: flex;
@@ -329,8 +329,8 @@ setupFaviconObserver()
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition:
-    transform 0.2s ease-out,
-    box-shadow 0.2s ease-out;
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   will-change: transform;
   contain: layout style paint;
 
@@ -356,7 +356,7 @@ setupFaviconObserver()
 
   &--loading {
     pointer-events: none;
-    opacity: 0.8;
+    opacity: var(--opacity-hover);
   }
 }
 
@@ -374,34 +374,34 @@ setupFaviconObserver()
 }
 
 .website-card__content {
-  padding: 1rem; // Reduced from 1.25rem
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 0.75rem; // Reduced from 1rem
-  overflow: hidden; // Prevent content overflow
-  max-width: 100%; // Ensure content stays within card bounds
+  gap: var(--spacing-lg);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .website-card__header {
   display: flex;
-  gap: 0.75rem; // Reduced from 1rem
+  gap: var(--spacing-lg);
   align-items: flex-start;
-  overflow: hidden; // Prevent header content overflow
-  max-width: 100%; // Ensure header stays within bounds
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .website-card__favicon {
   flex-shrink: 0;
-  width: 40px; // Reduced from 48px
-  height: 40px; // Reduced from 48px
-  border-radius: 10px; // Reduced radius
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background-color: var(--bg-body);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .website-card__favicon-img {
@@ -414,28 +414,28 @@ setupFaviconObserver()
   width: 100%;
   height: 100%;
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px; // Reduced from 20px
-  font-weight: bold;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
 }
 
 .website-card__title-section {
   flex: 1;
   min-width: 0;
-  padding-top: 0; // Removed padding-top
-  overflow: hidden; // Prevent content overflow
+  padding-top: 0;
+  overflow: hidden;
 }
 
 .website-card__title {
-  margin: 0 0 2px 0; // Reduced margin
-  font-size: 15px; // Reduced from 16px
-  font-weight: 700;
-  line-height: 1.3;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--text-main);
-  overflow: hidden; // Prevent title overflow
+  overflow: hidden;
 }
 
 .website-card__title-link {
@@ -445,7 +445,7 @@ setupFaviconObserver()
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%; // Ensure it doesn't overflow
+  max-width: 100%;
 
   &:hover {
     color: var(--color-primary);
@@ -455,17 +455,16 @@ setupFaviconObserver()
 .website-card__description {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.5;
-  /* Explicit line clamp styles */
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 3em;
-  width: 100%; /* Ensure it knows its width */
-  overflow-wrap: break-word; /* Standard property */
+  width: 100%;
+  overflow-wrap: break-word;
 }
 
 .website-card__body {
@@ -478,20 +477,20 @@ setupFaviconObserver()
 .website-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px; // Reduced from 6px
-  min-height: 20px; // Reduced min-height
+  gap: var(--spacing-xs);
+  min-height: 20px;
 }
 
 .website-card__tag {
-  padding: 2px 8px; // Reduced padding // Changed to rounded rect for more compact look, or keep pill? User image shows pills. Let's keep pills but smaller.
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   color: var(--color-primary);
   background-color: rgba(37, 99, 235, 0.08);
   border: 1px solid rgba(37, 99, 235, 0.1);
   @include text-truncate(1);
-  max-width: 80px; // Reduced max-width
+  max-width: 80px;
 
   &--more {
     background-color: var(--bg-tile);
@@ -501,27 +500,27 @@ setupFaviconObserver()
 }
 
 .website-card__footer {
-  padding-top: 0.5rem; // Reduced from 0.75rem
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-tile);
   margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 32px; // Reduced from 40px
+  height: 32px;
 }
 
 .website-card__stats {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-md);
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .website-card__stat {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .website-card__stat-divider {
@@ -530,22 +529,22 @@ setupFaviconObserver()
 
 .website-card__actions {
   display: flex;
-  gap: 4px; // Reduced gap
+  gap: var(--spacing-xs);
   opacity: 0;
   transform: translateY(4px);
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .drag-handle {
   position: absolute;
-  top: 8px; // Adjusted top
-  right: 8px; // Adjusted right
-  width: 24px; // Reduced size
-  height: 24px; // Reduced size
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 24px;
+  height: 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background-color: transparent;
   color: var(--text-muted);
   cursor: grab;
@@ -553,9 +552,9 @@ setupFaviconObserver()
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-fast);
   z-index: 5;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 
   &:hover {
     background-color: var(--bg-tile);
@@ -570,8 +569,8 @@ setupFaviconObserver()
 :deep(mark.highlight) {
   background-color: rgba(var(--color-primary-rgb), 0.15);
   color: inherit;
-  border-radius: 2px;
-  padding: 0 2px;
+  border-radius: var(--radius-xs);
+  padding: 0 var(--spacing-xs);
 }
 
 // Skeleton styles
@@ -582,45 +581,45 @@ setupFaviconObserver()
   width: 100%;
   height: 100%;
   background-color: var(--bg-card);
-  padding: 1rem; // Matched padding
+  padding: var(--spacing-xl);
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem; // Matched gap
+  gap: var(--spacing-lg);
 }
 
 .website-card__skeleton-header {
   display: flex;
-  gap: 0.75rem; // Matched gap
+  gap: var(--spacing-lg);
 }
 
 .website-card__skeleton-favicon {
-  width: 40px; // Matched size
-  height: 40px; // Matched size
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
   @include skeleton-loading;
 }
 
 .website-card__skeleton-text {
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   @include skeleton-loading;
 
   &--title {
-    height: 18px; // Reduced height
+    height: 18px;
     width: 60%;
-    margin-bottom: 6px;
+    margin-bottom: var(--spacing-sm);
   }
 
   &--description {
-    height: 12px; // Reduced height
+    height: 12px;
     width: 90%;
   }
 }
 
 .website-card__skeleton-tags {
-  height: 20px; // Reduced height
+  height: 20px;
   width: 50%;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   margin-top: auto;
   @include skeleton-loading;
 }

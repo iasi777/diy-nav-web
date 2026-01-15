@@ -151,18 +151,18 @@ defineExpose({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
+  gap: $spacing-xs;
   white-space: nowrap;
   text-decoration: none;
   outline: none;
   user-select: none;
   cursor: pointer;
   transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+    background-color $transition-fast,
+    border-color $transition-fast,
+    color $transition-fast,
+    transform $transition-fast,
+    box-shadow $transition-fast;
   will-change: transform;
 
   &:focus-visible {
@@ -191,28 +191,28 @@ defineExpose({
   }
 
   &--icon-only {
-    padding: var(--spacing-sm);
+    padding: $spacing-sm;
     min-width: auto;
   }
 
   &--shadow {
-    box-shadow: var(--shadow-md);
+    box-shadow: $shadow-md;
     &:hover {
-      box-shadow: var(--shadow-lg);
+      box-shadow: $shadow-lg;
     }
   }
 
   &--bordered {
-    border: 1px solid var(--color-border);
+    border: 1px solid $color-border;
   }
   &--rounded {
-    border-radius: var(--radius-md);
+    border-radius: $border-radius-md;
   }
   &--square {
-    border-radius: var(--radius-sm);
+    border-radius: $border-radius-sm;
   }
   &--pill {
-    border-radius: var(--radius-pill);
+    border-radius: $border-radius-pill;
   }
   &--circle {
     border-radius: 50%;
@@ -224,28 +224,28 @@ defineExpose({
   }
 
   &--xs {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-xs);
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
     min-height: 24px;
   }
   &--sm {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
     min-height: 32px;
   }
   &--md {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-base);
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
     min-height: 40px;
   }
   &--lg {
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-size: var(--font-size-lg);
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-size-lg;
     min-height: 48px;
   }
   &--xl {
-    padding: var(--spacing-lg) var(--spacing-xl);
-    font-size: var(--font-size-xl);
+    padding: $spacing-lg $spacing-xl;
+    font-size: $font-size-xl;
     min-height: 56px;
   }
 
@@ -276,14 +276,14 @@ defineExpose({
   }
 
   &--primary {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    border-color: var(--color-primary);
+    background-color: $color-primary;
+    color: $color-white;
+    border-color: $color-primary;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
+      background-color: $color-primary-dark;
+      border-color: $color-primary-dark;
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: $shadow-md;
     }
     &:active {
       transform: translateY(0);
@@ -291,122 +291,122 @@ defineExpose({
   }
 
   &--secondary {
-    background-color: var(--color-neutral-100);
-    color: var(--color-neutral-800);
-    border-color: var(--color-neutral-200);
+    background-color: $color-neutral-100;
+    color: $color-neutral-800;
+    border-color: $color-neutral-200;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: var(--color-neutral-200);
-      color: var(--color-neutral-900);
+      background-color: $color-neutral-200;
+      color: $color-neutral-900;
       transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
+      box-shadow: $shadow-sm;
     }
   }
 
   &--outline {
     background-color: transparent;
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    color: $color-primary;
+    border-color: $color-primary;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: var(--color-primary);
-      color: var(--color-white);
+      background-color: $color-primary;
+      color: $color-white;
       transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
+      box-shadow: $shadow-sm;
     }
   }
 
   &--neutral-outline {
     background-color: transparent;
-    color: var(--color-neutral-700);
-    border-color: var(--color-neutral-300);
+    color: $color-neutral-700;
+    border-color: $color-neutral-300;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: var(--color-neutral-100);
-      color: var(--color-neutral-900);
+      background-color: $color-neutral-100;
+      color: $color-neutral-900;
       transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
+      box-shadow: $shadow-sm;
     }
   }
 
   &--danger-outline {
     background-color: transparent;
-    color: var(--color-error);
-    border-color: var(--color-error);
+    color: $color-error;
+    border-color: $color-error;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: rgba(var(--color-error-rgb), 0.06);
-      color: var(--color-error);
+      background-color: rgba($color-error, 0.06);
+      color: $color-error;
       transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
+      box-shadow: $shadow-sm;
     }
   }
 
   &--ghost {
     background-color: transparent;
-    color: var(--color-primary);
+    color: $color-primary;
     border-color: transparent;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: rgba(var(--color-primary-rgb), 0.1);
-      color: var(--color-primary-dark);
+      background-color: rgba($color-primary, 0.1);
+      color: $color-primary-dark;
       transform: translateY(-1px);
     }
   }
 
   &--danger {
-    background-color: var(--color-error);
-    color: var(--color-white);
-    border-color: var(--color-error);
+    background-color: $color-error;
+    color: $color-white;
+    border-color: $color-error;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: #dc2626; /* Darker red (red-600) for hover */
-      border-color: #dc2626;
+      background-color: color.adjust($color-error, $lightness: -10%);
+      border-color: color.adjust($color-error, $lightness: -10%);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: $shadow-md;
     }
   }
 
   &--success {
-    background-color: var(--color-success);
-    color: var(--color-white);
-    border-color: var(--color-success);
+    background-color: $color-success;
+    color: $color-white;
+    border-color: $color-success;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: rgba(var(--color-success-rgb), 0.9);
-      border-color: rgba(var(--color-success-rgb), 0.1);
+      background-color: color.adjust($color-success, $lightness: -10%);
+      border-color: color.adjust($color-success, $lightness: -10%);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: $shadow-md;
     }
   }
 
   &--warning {
-    background-color: var(--color-warning);
-    color: var(--color-white);
-    border-color: var(--color-warning);
+    background-color: $color-warning;
+    color: $color-white;
+    border-color: $color-warning;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: rgba(var(--color-warning-rgb), 0.1);
-      border-color: rgba(var(--color-warning-rgb), 0.9);
+      background-color: color.adjust($color-warning, $lightness: -10%);
+      border-color: color.adjust($color-warning, $lightness: -10%);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: $shadow-md;
     }
   }
 
   &--info {
-    background-color: var(--color-info);
-    color: var(--color-white);
-    border-color: var(--color-info);
+    background-color: $color-info;
+    color: $color-white;
+    border-color: $color-info;
     &:hover:not(.base-button--disabled):not(.base-button--loading) {
-      background-color: rgba(var(--color-info-rgb), 0.1);
-      border-color: rgba(var(--color-info-rgb), 0.9);
+      background-color: color.adjust($color-info, $lightness: -10%);
+      border-color: color.adjust($color-info, $lightness: -10%);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: $shadow-md;
     }
   }
 }
 
 .base-button__icon {
   flex-shrink: 0;
-  transition: transform var(--transition-fast);
+  transition: transform $transition-fast;
 }
 .base-button__icon--left {
-  margin-right: var(--spacing-xs);
+  margin-right: $spacing-xs;
 }
 .base-button__icon--right {
-  margin-left: var(--spacing-xs);
+  margin-left: $spacing-xs;
 }
 
 .button-loading-icon {
@@ -463,21 +463,21 @@ defineExpose({
 @media print {
   .base-button {
     box-shadow: none;
-    border: 1px solid var(--color-black);
+    border: 1px solid $color-black;
   }
   .base-button--primary,
   .base-button--success,
   .base-button--info {
-    background-color: var(--color-black);
-    color: var(--color-white);
+    background-color: $color-black;
+    color: $color-white;
   }
   .base-button--danger {
-    background-color: var(--color-error);
-    color: var(--color-white);
+    background-color: $color-error;
+    color: $color-white;
   }
   .base-button--warning {
-    background-color: var(--color-warning);
-    color: var(--color-black);
+    background-color: $color-warning;
+    color: $color-black;
   }
 }
 </style>

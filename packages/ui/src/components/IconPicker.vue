@@ -72,13 +72,11 @@ const checkPosition = () => {
   const margin = 8
 
   let top = rect.bottom + margin
-  // Prefer top if space below is insufficient OR if we are in the bottom half of the screen and there is enough space above
   const spaceAbove = rect.top
   if (spaceBelow < panelHeight || (rect.top > window.innerHeight / 2 && spaceAbove > panelHeight)) {
     top = rect.top - panelHeight - margin
   }
 
-  // Ensure top is not negative
   if (top < 0) top = margin
 
   panelPosition.value = {
@@ -95,7 +93,6 @@ const panelStyle = computed(() => ({
 const toggle = async () => {
   if (!open.value) {
     open.value = true
-    // Wait for render to measure height
     setTimeout(() => {
       checkPosition()
     }, 0)
@@ -166,11 +163,11 @@ const icons = [
 .icon-picker {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  gap: $spacing-xs;
 }
 .icon-picker--compact {
   display: inline-flex;
-  gap: var(--spacing-xs);
+  gap: $spacing-xs;
   flex-wrap: nowrap;
   overflow-x: auto;
 }
@@ -180,25 +177,25 @@ const icons = [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-tile);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-tile);
-  color: var(--text-secondary);
+  border: 1px solid $color-neutral-200;
+  border-radius: $border-radius-sm;
+  background-color: $color-neutral-50;
+  color: $color-neutral-600;
   cursor: pointer;
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color $transition-fast,
+    color $transition-fast;
 
   &:hover {
-    background-color: var(--bg-tile-hover);
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: $color-neutral-100;
+    color: $color-primary;
+    border-color: $color-primary;
   }
 
   &.active {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    border-color: var(--color-primary);
+    background-color: $color-primary;
+    color: $color-white;
+    border-color: $color-primary;
   }
 }
 
@@ -214,35 +211,35 @@ const icons = [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-tile);
-  border-radius: var(--radius-md);
-  background-color: var(--bg-panel);
-  color: var(--text-main);
+  border: 1px solid $color-neutral-200;
+  border-radius: $border-radius-md;
+  background-color: $color-white;
+  color: $color-neutral-800;
   cursor: pointer;
   transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast);
-  font-size: var(--font-size-lg);
+    background-color $transition-fast,
+    transform $transition-fast;
+  font-size: $font-size-lg;
 
   &:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: $color-primary;
+    color: $color-primary;
   }
 }
 
 .icon-panel {
   position: fixed;
   margin-top: 0;
-  padding: var(--spacing-sm);
-  background-color: var(--bg-panel);
-  border: 1px solid var(--border-tile);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  padding: $spacing-sm;
+  background-color: $color-white;
+  border: 1px solid $color-neutral-200;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-lg;
   width: 280px;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
-  z-index: 10000;
+  gap: $spacing-xs;
+  z-index: $z-index-dropdown * 1000;
 }
 
 .icon-backdrop {
@@ -251,7 +248,7 @@ const icons = [
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 999;
+  z-index: $z-index-dropdown * 100 - 1;
   background: transparent;
 }
 </style>

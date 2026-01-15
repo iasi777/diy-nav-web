@@ -39,19 +39,19 @@ const emit = defineEmits<{
 .nav-color-picker {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: $spacing-xs;
 
   &__item {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 1px solid var(--color-border);
+    border: 1px solid $color-border;
     cursor: pointer;
     padding: 0;
-    transition: box-shadow var(--transition-fast);
+    transition: box-shadow $transition-fast;
 
     &--active {
-      box-shadow: 0 0 0 2px var(--color-primary);
+      box-shadow: 0 0 0 2px $color-primary;
     }
   }
 
@@ -68,8 +68,8 @@ const emit = defineEmits<{
     }
 
     &::-webkit-color-swatch {
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
+      border: 1px solid $color-border;
+      border-radius: $border-radius-sm;
     }
   }
 }

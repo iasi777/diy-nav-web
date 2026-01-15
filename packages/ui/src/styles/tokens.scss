@@ -1,0 +1,95 @@
+// 供需要运行时主题切换的应用引入
+// 将 SCSS 变量导出为 CSS 自定义属性
+@use './variables' as *;
+
+:root {
+  // 颜色系统
+  --color-primary: #{$color-primary};
+  --color-primary-light: #{$color-primary-light};
+  --color-primary-dark: #{$color-primary-dark};
+  --color-primary-rgb: #{$color-primary-rgb};
+  --color-secondary: #{$color-secondary};
+  --color-accent: #{$color-accent};
+  --color-white: #{$color-white};
+  --color-black: #{$color-black};
+
+  // 中性色
+  --color-neutral: #{$color-neutral};
+  --color-neutral-dark: #{$color-neutral-dark};
+  --color-neutral-50: #{$color-neutral-50};
+  --color-neutral-100: #{$color-neutral-100};
+  --color-neutral-200: #{$color-neutral-200};
+  --color-neutral-300: #{$color-neutral-300};
+  --color-neutral-400: #{$color-neutral-400};
+  --color-neutral-500: #{$color-neutral-500};
+  --color-neutral-600: #{$color-neutral-600};
+  --color-neutral-700: #{$color-neutral-700};
+  --color-neutral-800: #{$color-neutral-800};
+  --color-neutral-900: #{$color-neutral-900};
+
+  // 功能色
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
+  --color-error: #{$color-error};
+  --color-info: #{$color-info};
+  --color-border: #{$color-border};
+
+  // 圆角
+  --radius-xs: #{$border-radius-xs};
+  --radius-sm: #{$border-radius-sm};
+  --radius-md: #{$border-radius-md};
+  --radius-lg: #{$border-radius-lg};
+  --radius-xl: #{$border-radius-xl};
+  --radius-2xl: #{$border-radius-2xl};
+  --radius-full: #{$border-radius-full};
+  --radius-pill: #{$border-radius-pill};
+
+  // 间距
+  --spacing-xs: #{$spacing-xs};
+  --spacing-sm: #{$spacing-sm};
+  --spacing-md: #{$spacing-md};
+  --spacing-lg: #{$spacing-lg};
+  --spacing-xl: #{$spacing-xl};
+  --spacing-2xl: #{$spacing-2xl};
+
+  // 阴影
+  --shadow-xs: #{$shadow-xs};
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+  --shadow-card: #{$shadow-card};
+  --shadow-card-hover: #{$shadow-card-hover};
+
+  // 字体
+  --font-family: #{$font-family-sans};
+  --font-family-mono: #{$font-family-mono};
+  --font-size-xs: #{$font-size-xs};
+  --font-size-sm: #{$font-size-sm};
+  --font-size-base: #{$font-size-base};
+  --font-size-lg: #{$font-size-lg};
+  --font-size-xl: #{$font-size-xl};
+  --font-weight-light: #{$font-weight-light};
+  --font-weight-normal: #{$font-weight-normal};
+  --font-weight-medium: #{$font-weight-medium};
+  --font-weight-semibold: #{$font-weight-semibold};
+  --font-weight-bold: #{$font-weight-bold};
+  --line-height-tight: #{$line-height-tight};
+  --line-height-normal: #{$line-height-normal};
+  --line-height-relaxed: #{$line-height-relaxed};
+
+  // 动画
+  --transition-fast: #{$transition-fast};
+  --transition-normal: #{$transition-normal};
+  --transition-slow: #{$transition-slow};
+
+  // 透明度
+  --opacity-disabled: #{$opacity-disabled};
+  --opacity-hover: #{$opacity-hover};
+  --opacity-focus: #{$opacity-focus};
+
+  // Z-index
+  --z-index-dropdown: #{$z-index-dropdown};
+  --z-index-modal: #{$z-index-modal};
+  --z-index-toast: #{$z-index-toast};
+}

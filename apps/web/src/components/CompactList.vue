@@ -175,6 +175,8 @@ const goNext = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .compact-list {
   width: 100%;
   position: relative;
@@ -196,17 +198,19 @@ const goNext = () => {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(3, var(--tile-h));
-  gap: 12px;
+  gap: var(--spacing-lg);
   place-content: start start;
-  height: calc(3 * var(--tile-h) + 2 * 12px);
+  height: calc(3 * var(--tile-h) + 2 * var(--spacing-lg));
   padding-bottom: 0;
-  margin-bottom: calc(var(--pager-h) + 8px);
+  margin-bottom: calc(var(--pager-h) + var(--spacing-md));
 }
+
 @media (max-width: 1024px) {
   .tiles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
 @media (max-width: 768px) {
   .tiles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -218,15 +222,15 @@ const goNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--border-tile);
   background: var(--bg-tile);
   height: var(--tile-h);
   box-sizing: border-box;
-  padding: 10px 10px 8px;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md);
   transition:
-    transform 0.15s ease-out,
-    box-shadow 0.15s ease-out;
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   will-change: transform;
   min-width: 0;
 }
@@ -246,7 +250,7 @@ const goNext = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-md);
   background-color: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
@@ -262,7 +266,7 @@ const goNext = () => {
   width: 38px;
   height: 38px;
   background-size: cover;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .tile-favicon.placeholder {
@@ -271,11 +275,11 @@ const goNext = () => {
   justify-content: center;
   background: var(--color-neutral-100);
   color: var(--color-neutral-500);
-  font-size: 18px;
+  font-size: var(--font-size-lg);
 }
 
 .tile-name {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-neutral-800);
   display: block;
   max-width: 100%;
@@ -283,13 +287,13 @@ const goNext = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
-  line-height: 1.3;
+  line-height: var(--line-height-tight);
 }
 
 .tile-star {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
   background: none;
   border: none;
   color: var(--color-neutral-500);
@@ -312,7 +316,7 @@ const goNext = () => {
 .tile-main:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .tile-star:hover {
@@ -322,26 +326,26 @@ const goNext = () => {
 .pager-portal-content {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
   color: var(--color-neutral-500);
 }
 
 .pager-btn {
   width: 22px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-tile);
   background: var(--bg-tile);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .pager-btn:hover:not(:disabled) {
@@ -351,7 +355,7 @@ const goNext = () => {
 }
 
 .pager-btn:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
   background: var(--bg-page);
   border-color: var(--border-tile);
@@ -360,24 +364,28 @@ const goNext = () => {
 .pager-info {
   min-width: 40px;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-neutral-700);
 }
+
 @media (max-width: 640px) {
   .compact-list {
     --tile-h: clamp(96px, 10vh, 112px);
   }
 }
+
 @media (min-width: 1440px) {
   .compact-list {
     --tile-h: clamp(84px, 8vh, 100px);
   }
 }
+
 @media (min-width: 1920px) {
   .compact-list {
     --tile-h: clamp(82px, 7.5vh, 98px);
   }
 }
+
 @media (min-width: 2560px) {
   .compact-list {
     --tile-h: clamp(80px, 7vh, 96px);

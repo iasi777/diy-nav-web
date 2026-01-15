@@ -278,12 +278,13 @@ defineExpose({ focus, blur, select, inputRef })
 <style scoped lang="scss">
 @use '../styles/variables.scss' as *;
 @use '../styles/mixins.scss' as *;
+
 .base-input {
   width: 100%;
   position: relative;
 }
 .base-input--disabled {
-  opacity: var(--opacity-disabled);
+  opacity: $opacity-disabled;
   cursor: not-allowed;
 }
 .base-input--readonly {
@@ -291,53 +292,53 @@ defineExpose({ focus, blur, select, inputRef })
 }
 .base-input__label {
   display: block;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-700);
-  margin-bottom: var(--spacing-xs);
-  transition: color var(--transition-fast);
+  font-weight: $font-weight-medium;
+  color: $color-neutral-700;
+  margin-bottom: $spacing-xs;
+  transition: color $transition-fast;
 }
 .base-input__label--required::after {
   content: ' *';
-  color: var(--color-error);
+  color: $color-error;
 }
 .base-input__wrapper {
   position: relative;
   display: flex;
   align-items: stretch;
-  background-color: var(--color-neutral-100);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background-color: $color-neutral-100;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
   transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 }
 .base-input--square .base-input__wrapper {
-  border-radius: var(--radius-sm);
+  border-radius: $border-radius-sm;
 }
 .base-input--rounded .base-input__wrapper {
-  border-radius: var(--radius-md);
+  border-radius: $border-radius-md;
 }
 .base-input__wrapper--focused {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  border-color: $color-primary;
+  box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
 }
 .base-input__wrapper--disabled {
-  background-color: var(--color-neutral-100);
-  border-color: var(--color-neutral-200);
+  background-color: $color-neutral-100;
+  border-color: $color-neutral-200;
   cursor: not-allowed;
 }
 .base-input__wrapper--readonly {
-  background-color: var(--color-neutral-100);
-  border-color: var(--color-neutral-200);
+  background-color: $color-neutral-100;
+  border-color: $color-neutral-200;
 }
 .base-input__wrapper--error {
-  border-color: var(--color-error);
+  border-color: $color-error;
 }
 .base-input__wrapper--success {
-  border-color: var(--color-success);
+  border-color: $color-success;
 }
 .base-input__wrapper--warning {
-  border-color: var(--color-warning);
+  border-color: $color-warning;
 }
 .base-input__inner {
   flex: 1;
@@ -345,20 +346,20 @@ defineExpose({ focus, blur, select, inputRef })
   border: none;
   outline: none;
   background: transparent;
-  color: var(--color-neutral-800);
-  font-family: var(--font-family);
-  padding: var(--spacing-sm) var(--spacing-md);
+  color: $color-neutral-800;
+  font-family: $font-family-sans;
+  padding: $spacing-sm $spacing-md;
   resize: vertical;
   transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 }
 .base-input__inner::placeholder {
-  color: var(--color-neutral-400);
+  color: $color-neutral-400;
 }
 .base-input__inner:disabled {
   cursor: not-allowed;
-  color: var(--color-neutral-400);
+  color: $color-neutral-400;
 }
 .base-input__inner:read-only {
   cursor: default;
@@ -370,23 +371,23 @@ defineExpose({ focus, blur, select, inputRef })
   padding-right: 2.25rem;
 }
 .base-input__textarea {
-  line-height: var(--line-height-normal);
-  padding: var(--spacing-sm) var(--spacing-md);
+  line-height: $line-height-normal;
+  padding: $spacing-sm $spacing-md;
   min-height: 80px;
 }
 .base-input__icon {
   position: absolute;
-  color: var(--text-muted);
-  transition: color var(--transition-fast);
+  color: $color-neutral-500;
+  transition: color $transition-fast;
   pointer-events: none;
 }
 .base-input__icon--prefix {
-  left: var(--spacing-sm);
+  left: $spacing-sm;
   z-index: 1;
 }
 .base-input__prefix-slot {
   position: absolute;
-  left: var(--spacing-sm);
+  left: $spacing-sm;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -394,56 +395,56 @@ defineExpose({ focus, blur, select, inputRef })
   align-items: center;
 }
 .base-input__icon--suffix {
-  right: var(--spacing-sm);
+  right: $spacing-sm;
   z-index: 1;
 }
 .base-input__suffix {
   position: absolute;
-  right: var(--spacing-sm);
+  right: $spacing-sm;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: $spacing-xs;
   z-index: 1;
 }
 .base-input__clear-btn {
-  color: var(--text-muted);
+  color: $color-neutral-500;
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: color $transition-fast;
 }
 .base-input__clear-btn:hover {
-  color: var(--text-secondary);
+  color: $color-neutral-600;
 }
 .base-input__password-toggle {
-  color: var(--text-muted);
+  color: $color-neutral-500;
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: color $transition-fast;
 }
 .base-input__password-toggle:hover {
-  color: var(--text-secondary);
+  color: $color-neutral-600;
 }
 .base-input__loading-icon {
-  color: var(--color-primary);
+  color: $color-primary;
 }
 .base-input__char-count {
   text-align: right;
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  margin-top: var(--spacing-xs);
-  transition: color var(--transition-fast);
+  font-size: $font-size-xs;
+  color: $color-neutral-600;
+  margin-top: $spacing-xs;
+  transition: color $transition-fast;
 }
 .base-input__char-count--error {
-  color: var(--color-error);
+  color: $color-error;
 }
 .base-input__help-text {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin-top: var(--spacing-xs);
-  transition: color var(--transition-fast);
+  font-size: $font-size-sm;
+  color: $color-neutral-600;
+  margin-top: $spacing-xs;
+  transition: color $transition-fast;
 }
 .base-input__help-text--error {
-  color: var(--color-error);
+  color: $color-error;
 }
 @include mobile {
   .base-input__inner {
@@ -452,14 +453,14 @@ defineExpose({ focus, blur, select, inputRef })
 }
 .base-input--sm .base-input__inner {
   min-height: 32px;
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
 }
 .base-input--md .base-input__inner {
   min-height: 40px;
 }
 .base-input--lg .base-input__inner {
   min-height: 48px;
-  font-size: var(--font-size-lg);
+  font-size: $font-size-lg;
 }
 .base-input--sm .base-input__wrapper {
   min-height: 32px;

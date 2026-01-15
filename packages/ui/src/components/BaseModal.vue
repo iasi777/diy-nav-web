@@ -145,6 +145,7 @@ onUnmounted(() => {
 <style scoped lang="scss">
 @use '../styles/variables.scss' as *;
 @use '../styles/mixins.scss' as *;
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -155,17 +156,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-index-modal);
-  padding: var(--spacing-lg);
+  z-index: $z-index-modal;
+  padding: $spacing-lg;
   backdrop-filter: blur(1px);
 }
 :global([data-theme='dark']) .modal-overlay {
   background-color: rgba(0, 0, 0, 0.7);
 }
 .modal-container {
-  background-color: var(--bg-panel);
-  border-radius: 16px;
-  box-shadow: var(--shadow-xl);
+  background-color: $color-white;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-xl;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -199,14 +200,14 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  padding: $spacing-lg;
+  border-bottom: 1px solid $color-border;
   flex-shrink: 0;
 }
 .modal-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-800);
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-neutral-800;
   margin: 0;
   flex: 1;
 }
@@ -215,26 +216,26 @@ onUnmounted(() => {
   height: 32px;
   border: none;
   background: none;
-  color: var(--color-neutral-500);
-  border-radius: var(--radius-sm);
+  color: $color-neutral-500;
+  border-radius: $border-radius-sm;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color $transition-fast,
+    color $transition-fast;
 }
 .modal-close-btn:hover {
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-700);
+  background-color: $color-neutral-100;
+  color: $color-neutral-700;
 }
 .modal-close-btn:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid $color-primary;
   outline-offset: 2px;
 }
 .modal-body {
-  padding: var(--spacing-lg);
+  padding: $spacing-lg;
   flex: 1;
   overflow-y: auto;
 }
@@ -243,21 +244,21 @@ onUnmounted(() => {
   max-height: calc(90vh - 140px);
 }
 .modal-footer {
-  padding: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
+  padding: $spacing-lg;
+  border-top: 1px solid $color-border;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--spacing-sm);
+  gap: $spacing-sm;
   flex-shrink: 0;
 }
 .modal-enter-active,
 .modal-leave-active {
-  transition: all var(--transition-normal);
+  transition: all $transition-normal;
 }
 .modal-enter-active .modal-container,
 .modal-leave-active .modal-container {
-  transition: all var(--transition-normal);
+  transition: all $transition-normal;
 }
 .modal-enter-from,
 .modal-leave-to {
@@ -270,7 +271,7 @@ onUnmounted(() => {
 }
 @include mobile {
   .modal-overlay {
-    padding: var(--spacing-sm);
+    padding: $spacing-sm;
   }
   .modal-size-sm,
   .modal-size-md,
@@ -285,7 +286,7 @@ onUnmounted(() => {
   .modal-header,
   .modal-body,
   .modal-footer {
-    padding: var(--spacing-md);
+    padding: $spacing-md;
   }
 }
 @media print {
@@ -297,7 +298,7 @@ onUnmounted(() => {
   }
   .modal-container {
     box-shadow: none;
-    border: 1px solid var(--color-border);
+    border: 1px solid $color-border;
     max-height: none;
   }
 }
@@ -306,7 +307,7 @@ onUnmounted(() => {
     background-color: rgba(0, 0, 0, 0.8);
   }
   .modal-container {
-    border: 2px solid var(--color-black);
+    border: 2px solid $color-black;
   }
 }
 @media (prefers-reduced-motion: reduce) {

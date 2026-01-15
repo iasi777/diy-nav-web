@@ -126,12 +126,12 @@ const goToAll = () => {
   // Card 样式复刻
   background: var(--bg-panel);
   border: 1px solid var(--border-tile);
-  border-radius: 18px;
-  padding: 24px;
+  border-radius: var(--radius-card);
+  padding: var(--spacing-2xl);
   box-shadow: var(--shadow-card);
   transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+    background-color var(--transition-slow),
+    box-shadow var(--transition-slow);
 }
 
 .section-title-row {
@@ -139,7 +139,7 @@ const goToAll = () => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-sm);
-  height: 32px;
+  height: var(--spacing-2xl);
 }
 
 .section-title {
@@ -148,23 +148,23 @@ const goToAll = () => {
   gap: var(--spacing-sm);
   margin: 0;
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-main);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .panel-title-pill {
-  width: 6px;
-  height: 6px;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
   background-color: var(--color-primary);
-  border-radius: 50%; // 变成圆点，匹配截图
+  border-radius: 50%;
 }
 
 .count {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  font-weight: normal;
-  margin-left: 2px;
+  font-weight: var(--font-weight-normal);
+  margin-left: var(--spacing-xs);
 }
 
 .bottom-area {
@@ -185,7 +185,7 @@ const goToAll = () => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 20px;
+  padding: var(--spacing-xl);
   max-width: 400px;
   margin: 0 auto;
 }
@@ -193,51 +193,51 @@ const goToAll = () => {
 .empty-icon-wrapper {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
-  border-radius: 20px;
+  background: linear-gradient(135deg, #e0e7ff 0%, var(--color-neutral-100) 100%);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
 
   i {
-    font-size: 28px;
-    color: #3b82f6;
+    font-size: var(--font-size-xl);
+    color: var(--color-primary);
   }
 }
 
 .empty-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-main);
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 .empty-desc {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0 0 24px 0;
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--spacing-2xl) 0;
 }
 
 .empty-actions {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .empty-btn {
   height: 36px;
-  padding: 0 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 0 var(--spacing-xl);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  gap: var(--spacing-sm);
+  transition: all var(--transition-fast);
 
   &.outline {
     background: transparent;
@@ -253,8 +253,8 @@ const goToAll = () => {
 .empty-examples {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-xs);
 }
 
 .example-label {
@@ -262,10 +262,10 @@ const goToAll = () => {
 }
 
 .example-pill {
-  padding: 2px 8px;
+  padding: var(--spacing-xs) var(--spacing-md);
   background: var(--bg-tile);
   border: 1px solid var(--border-tile);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--text-secondary);
 }
 </style>

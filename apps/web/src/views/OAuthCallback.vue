@@ -92,11 +92,11 @@ const retryLogin = () => {
 }
 </script>
 
-<style scoped>
-/* Dark mode support logic is handled by AuthLayout now */
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
 
 .logo-wrapper {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 /* Error State Styles */
@@ -112,68 +112,68 @@ const retryLogin = () => {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #fee2e2;
+  background: rgba($color-error, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 .error-icon {
   width: 32px;
   height: 32px;
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .text-error {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .btn-retry {
-  margin-top: 8px;
-  padding: 10px 24px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 99px;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 500;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .btn-retry:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #111827;
+  background: var(--color-neutral-50);
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-900);
 }
 
 .status-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-main);
+  margin-bottom: var(--spacing-md);
 }
 
 .status-desc {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 32px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .progress-bar {
   width: 100%;
-  height: 6px;
-  background: #f1f5f9;
-  border-radius: 999px;
+  height: var(--spacing-sm);
+  background: var(--color-neutral-100);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .progress-inner {
   height: 100%;
-  background: #2563eb;
+  background: var(--color-primary);
   width: 30%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   animation: progress 1.5s ease-in-out infinite;
 }
 
@@ -190,23 +190,19 @@ const retryLogin = () => {
   }
 }
 
-/* Dark mode support (if app uses .dark class on html/body) */
-@media (prefers-color-scheme: dark) {
-  .callback-layout {
-    background-color: #0f172a;
-  }
-  .callback-card {
-    background-color: #1e293b;
-    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.3);
+/* Dark mode support */
+:global([data-theme='dark']) {
+  .error-icon-wrapper {
+    background: rgba($color-error, 0.15);
   }
   .status-title {
-    color: #f8fafc;
+    color: var(--text-main);
   }
   .status-desc {
-    color: #94a3b8;
+    color: var(--text-secondary);
   }
   .progress-bar {
-    background: #334155;
+    background: var(--color-neutral-700);
   }
 }
 </style>

@@ -224,7 +224,10 @@ const goNext = () => {
   height: var(--tile-h);
   box-sizing: border-box;
   padding: 10px 10px 8px;
-  transition: all 0.15s ease-out;
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+  will-change: transform;
   min-width: 0;
 }
 
@@ -336,7 +339,9 @@ const goNext = () => {
   cursor: pointer;
   font-size: 12px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .pager-btn:hover:not(:disabled) {

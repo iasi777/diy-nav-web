@@ -128,7 +128,10 @@ const goToAllWithTag = (tagId: string) => router.push({ path: '/all', query: { t
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  transition: all 0.12s ease-out;
+  transition:
+    background-color 0.12s ease-out,
+    border-color 0.12s ease-out,
+    transform 0.12s ease-out;
 }
 .filter-tag:hover {
   background: var(--bg-tile-hover);
@@ -202,7 +205,9 @@ const goToAllWithTag = (tagId: string) => router.push({ path: '/all', query: { t
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     border-color: var(--color-primary);

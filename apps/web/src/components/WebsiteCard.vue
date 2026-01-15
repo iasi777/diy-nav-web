@@ -30,13 +30,14 @@
       <!-- 卡片头部 - 网站图标和基本信息 -->
       <header class="website-card__header">
         <!-- 网站图标 -->
-        <div class="website-card__favicon">
+        <div ref="faviconRef" class="website-card__favicon">
           <img
-            v-if="website.favicon && !faviconError"
+            v-if="shouldLoadFavicon && website.favicon && !faviconError"
             :src="website.favicon"
             :alt="`${website.name}的图标`"
             class="website-card__favicon-img"
             loading="lazy"
+            decoding="async"
             @error="handleFaviconError"
           />
           <div v-else class="website-card__favicon-placeholder">
@@ -177,6 +178,32 @@ interface Emits {
 const tagStore = useTagStore()
 const isHovered = ref(false)
 const faviconError = ref(false)
+const shouldLoadFavicon = ref(false)
+
+// 使用 Intersection Observer 优化图标加载
+const faviconRef = ref<HTMLElement>()
+
+// 只在图标进入视口时才加载
+const setupFaviconObserver = () => {
+  if (!faviconRef.value || !('IntersectionObserver' in window)) {
+    shouldLoadFavicon.value = true
+    return
+  }
+
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          shouldLoadFavicon.value = true
+          observer.disconnect()
+        }
+      })
+    },
+    { rootMargin: '50px' } // 提前 50px 开始加载
+  )
+
+  observer.observe(faviconRef.value)
+}
 
 const cardClasses = computed(() => ({
   'website-card--hovered': isHovered.value,
@@ -282,6 +309,9 @@ const handleKeydown = (event: KeyboardEvent) => {
       break
   }
 }
+
+// 初始化图标观察器
+setupFaviconObserver()
 </script>
 
 <style scoped lang="scss">
@@ -293,15 +323,16 @@ const handleKeydown = (event: KeyboardEvent) => {
   background-color: var(--bg-card);
   border-radius: 12px; // Reduced radius
   border: 1px solid var(--border-tile);
-  transition:
-    background-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-    box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-    transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+  will-change: transform;
+  contain: layout style paint;
 
   &--clickable {
     cursor: pointer;
@@ -502,7 +533,9 @@ const handleKeydown = (event: KeyboardEvent) => {
   gap: 4px; // Reduced gap
   opacity: 0;
   transform: translateY(4px);
-  transition: all 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .drag-handle {
@@ -520,7 +553,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
   z-index: 5;
   font-size: 12px;
 

@@ -185,7 +185,9 @@ const icons = [
   background-color: var(--bg-tile);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 
   &:hover {
     background-color: var(--bg-tile-hover);
@@ -217,7 +219,9 @@ const icons = [
   background-color: var(--bg-panel);
   color: var(--text-main);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
   font-size: var(--font-size-lg);
 
   &:hover {

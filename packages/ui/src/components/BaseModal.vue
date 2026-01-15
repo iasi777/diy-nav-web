@@ -221,7 +221,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 .modal-close-btn:hover {
   background-color: var(--color-neutral-100);

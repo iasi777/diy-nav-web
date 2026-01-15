@@ -157,7 +157,13 @@ defineExpose({
   outline: none;
   user-select: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  will-change: transform;
 
   &:focus-visible {
     @include focus-visible;

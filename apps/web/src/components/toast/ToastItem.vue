@@ -154,11 +154,10 @@ const iconClasses = computed(() => {
 // 进度条样式
 const progressStyles = computed(() => {
   const duration = props.duration || props.toast?.duration || 3000
-  const progress = isHovered.value ? remainingTime.value : Math.max(0, remainingTime.value - 16) // 假设60fps，每帧约16ms
 
   return {
-    width: `${(progress / duration) * 100}%`,
-    transition: isHovered.value ? 'none' : 'width 16ms linear'
+    animationDuration: `${duration}ms`,
+    animationPlayState: isHovered.value ? 'paused' : 'running'
   }
 })
 
@@ -170,17 +169,16 @@ const showToast = async () => {
   // 设置自动关闭
   if (props.autoClose && (props.duration || props.toast?.duration)) {
     const duration = props.duration || props.toast?.duration || 3000
-    remainingTime.value = duration
 
-    // 开始进度动画
-    progressInterval.value = setInterval(() => {
+    // 使用 setTimeout 替代 setInterval，避免频繁更新
+    const timeoutId = setTimeout(() => {
       if (!isHovered.value) {
-        remainingTime.value -= 16
-        if (remainingTime.value <= 0) {
-          handleClose()
-        }
+        handleClose()
       }
-    }, 16)
+    }, duration)
+
+    // 保存 timeout ID 用于清理
+    progressInterval.value = timeoutId as unknown as ReturnType<typeof setInterval>
   }
 }
 
@@ -188,7 +186,7 @@ const showToast = async () => {
 const handleClose = () => {
   isVisible.value = false
   if (progressInterval.value) {
-    clearInterval(progressInterval.value)
+    clearTimeout(progressInterval.value as unknown as ReturnType<typeof setTimeout>)
   }
 
   // 延迟触发关闭事件，让动画完成
@@ -248,7 +246,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (progressInterval.value) {
-    clearInterval(progressInterval.value)
+    clearTimeout(progressInterval.value as unknown as ReturnType<typeof setTimeout>)
   }
   if (toastRef.value) {
     toastRef.value.removeEventListener('keydown', handleKeydown)
@@ -282,7 +280,9 @@ defineExpose({
   max-width: 400px;
   position: relative;
   overflow: hidden;
-  transition: all var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal);
   opacity: 0;
   transform: translateY(-20px) scale(0.9);
   cursor: pointer;
@@ -386,7 +386,9 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
   font-size: var(--font-size-xs);
 
   &:hover {
@@ -406,8 +408,19 @@ defineExpose({
   bottom: 0;
   left: 0;
   height: 3px;
+  width: 100%;
   background-color: var(--color-primary);
-  transition: width 16ms linear;
+  transform-origin: left;
+  animation: progress-shrink linear forwards;
+
+  @keyframes progress-shrink {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
 
   .toast-item--success & {
     background-color: var(--color-success);
@@ -444,7 +457,9 @@ defineExpose({
   color: var(--text-secondary);
   font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 
   &:hover {
     background-color: var(--bg-tile-hover);

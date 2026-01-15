@@ -68,34 +68,38 @@
         </div>
 
         <!-- Filtered Grid -->
-        <div v-else class="website-grid">
-          <div
-            v-for="site in filteredWebsites"
-            :key="site.id"
-            class="website-draggable"
-            draggable="true"
-            @dragstart="onDragStart(site.id, $event)"
-            @dragover="onDragOver(site.id, $event)"
-            @drop="onDrop(site.id, $event)"
-            @dragend="onDragEnd"
-          >
-            <WebsiteCard
-              :website="site"
-              @visit="onVisit"
-              @edit="emit('edit', site)"
-              @delete="emit('delete', site.id)"
-              @favorite-toggle="onFavoriteToggle"
-            />
-          </div>
-
-          <div v-if="filteredWebsites.length > 0" class="add-card" @click="onAddSite">
-            <div class="add-card-content">
-              <div class="add-icon">
-                <i class="fas fa-plus" />
+        <div v-else>
+          <InfiniteWebsiteGrid :websites="filteredWebsites" :page-size="30" :initial-size="30">
+            <template #default="{ website }">
+              <div
+                class="website-draggable"
+                draggable="true"
+                @dragstart="onDragStart(website.id, $event)"
+                @dragover="onDragOver(website.id, $event)"
+                @drop="onDrop(website.id, $event)"
+                @dragend="onDragEnd"
+              >
+                <WebsiteCard
+                  :website="website"
+                  @visit="onVisit"
+                  @edit="emit('edit', website)"
+                  @delete="emit('delete', website.id)"
+                  @favorite-toggle="onFavoriteToggle"
+                />
               </div>
-              <span>添加网站</span>
-            </div>
-          </div>
+            </template>
+
+            <template v-if="filteredWebsites.length > 0" #add-card>
+              <div class="add-card" @click="onAddSite">
+                <div class="add-card-content">
+                  <div class="add-icon">
+                    <i class="fas fa-plus" />
+                  </div>
+                  <span>添加网站</span>
+                </div>
+              </div>
+            </template>
+          </InfiniteWebsiteGrid>
         </div>
 
         <EmptyState
@@ -137,6 +141,7 @@
  */
 import { computed } from 'vue'
 import WebsiteCard from '@/components/WebsiteCard.vue'
+import InfiniteWebsiteGrid from '@/components/InfiniteWebsiteGrid.vue'
 import { EmptyState, BaseButton } from '@nav/ui'
 import { useWebsiteStore } from '@/stores/website'
 import { useWebsiteSearch } from '@/composables/useWebsiteSearch'
@@ -198,10 +203,8 @@ const onVisit = (website: Website) => {
   window.open(website.url, '_blank', 'noopener,noreferrer')
 }
 
-const onFavoriteToggle = (id: string) => {
-  const w = websiteStore.websites.find(x => x.id === id)
-  if (!w) return
-  websiteStore.updateWebsite(id, { isFavorite: !w.isFavorite })
+const onFavoriteToggle = (website: Website) => {
+  websiteStore.toggleFavorite(website.id)
 }
 </script>
 

@@ -57,7 +57,9 @@ defineOptions({ name: 'WebsiteCardActions' })
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
   padding: 0;
   font-size: 12px;
 

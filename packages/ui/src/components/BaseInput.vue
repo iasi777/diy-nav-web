@@ -307,7 +307,9 @@ defineExpose({ focus, blur, select, inputRef })
   background-color: var(--color-neutral-100);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 .base-input--square .base-input__wrapper {
   border-radius: var(--radius-sm);
@@ -347,7 +349,9 @@ defineExpose({ focus, blur, select, inputRef })
   font-family: var(--font-family);
   padding: var(--spacing-sm) var(--spacing-md);
   resize: vertical;
-  transition: all var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 .base-input__inner::placeholder {
   color: var(--color-neutral-400);

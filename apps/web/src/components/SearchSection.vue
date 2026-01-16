@@ -203,8 +203,10 @@ const onVisit = (website: Website) => {
   window.open(website.url, '_blank', 'noopener,noreferrer')
 }
 
-const onFavoriteToggle = (website: Website) => {
-  websiteStore.toggleFavorite(website.id)
+const onFavoriteToggle = (websiteId: string) => {
+  const w = websiteStore.websites.find(x => x.id === websiteId)
+  if (!w) return
+  websiteStore.updateWebsite(websiteId, { isFavorite: !w.isFavorite })
 }
 </script>
 

@@ -12,31 +12,60 @@ import {
   consumeRateLimit,
   recordUsage,
   getUserStats,
+  decrypt,
   encrypt,
+  toProviderDTO,
+  type AIProvider,
   type AIProviderConfig
 } from '@nav/ai-core'
 import { config } from '@nav/config'
 import { scrapeWebPage, formatContentForAI } from '../lib/web-scraper.js'
+import { d1Client } from '../services.js'
+import {
+  listUserProviders,
+  createProvider,
+  deleteProvider,
+  findUserProviderById,
+  findUserDefaultProvider,
+  findUserFirstProvider,
+  updateProvider
+} from '../lib/ai-provider-store.js'
 
 // Initialize provider registry with JWT secret as encryption key
 const providerRegistry = new AIProviderRegistry(config.auth.jwtSecret)
-
-// In-memory provider storage (will be moved to database later)
-const userProviders: Map<string, AIProviderConfig[]> = new Map()
 
 const aiRoutes: FastifyPluginAsyncZod = async app => {
   // ============================================
   // Provider Management
   // ============================================
 
-  const providerInputSchema = z.object({
-    name: z.string().min(1).max(50),
-    type: z.enum(['openai', 'claude', 'qwen', 'ernie', 'custom']),
-    apiKey: z.string().min(1),
-    baseUrl: z.string().url().optional(),
-    model: z.string().optional(),
-    isDefault: z.boolean().optional()
-  })
+  const providerInputSchema = z
+    .object({
+      name: z.string().min(1).max(50),
+      type: z.enum(['openai', 'claude', 'qwen', 'ernie', 'custom']),
+      apiKey: z.string().min(1),
+      baseUrl: z.string().url().optional(),
+      model: z.string().optional(),
+      isDefault: z.boolean().optional()
+    })
+    .superRefine((data, ctx) => {
+      if (data.type === 'custom') {
+        if (!data.baseUrl) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Custom provider requires baseUrl',
+            path: ['baseUrl']
+          })
+        }
+        if (!data.model) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Custom provider requires model',
+            path: ['model']
+          })
+        }
+      }
+    })
 
   // List user's AI providers
   app.get(
@@ -46,20 +75,38 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
     },
     async req => {
       const userId = req.user.sub
-      const providers = userProviders.get(userId) || []
+      const providers = await listUserProviders(d1Client, userId)
+      return { success: true, data: providers.map(toProviderDTO) }
+    }
+  )
 
-      // Return without sensitive data
-      const safeProviders = providers.map(p => ({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        baseUrl: p.baseUrl,
-        model: p.model,
-        isDefault: p.isDefault,
-        createdAt: p.createdAt
-      }))
+  // Get provider detail (includes apiKey for editing)
+  app.get(
+    '/ai/providers/:id',
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        params: z.object({ id: z.string().uuid() })
+      }
+    },
+    async (req, reply) => {
+      const userId = req.user.sub
+      const { id } = req.params
+      const provider = await findUserProviderById(d1Client, userId, id)
 
-      return { success: true, data: safeProviders }
+      if (!provider) {
+        return reply.code(404).send({ success: false, message: 'Provider not found' })
+      }
+
+      const apiKey = decrypt(provider.apiKeyEncrypted, config.auth.jwtSecret)
+
+      return {
+        success: true,
+        data: {
+          ...toProviderDTO(provider),
+          apiKey
+        }
+      }
     }
   )
 
@@ -93,30 +140,58 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
         updatedAt: now
       }
 
-      // Get or create user's provider list
-      let providers = userProviders.get(userId)
-      if (!providers) {
-        providers = []
-        userProviders.set(userId, providers)
-      }
-
-      // If this is default, unset other defaults
-      if (isDefault) {
-        providers.forEach(p => (p.isDefault = false))
-      }
-
-      providers.push(newProvider)
+      await createProvider(d1Client, newProvider)
 
       return {
         success: true,
-        data: {
-          id: newProvider.id,
-          name: newProvider.name,
-          type: newProvider.type,
-          baseUrl: newProvider.baseUrl,
-          model: newProvider.model,
-          isDefault: newProvider.isDefault
-        }
+        data: toProviderDTO(newProvider)
+      }
+    }
+  )
+
+  // Update provider
+  app.patch(
+    '/ai/providers/:id',
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        params: z.object({ id: z.string().uuid() }),
+        body: providerInputSchema
+      }
+    },
+    async (req, reply) => {
+      const userId = req.user.sub
+      const { id } = req.params
+      const { name, type, apiKey, baseUrl, model, isDefault } = req.body
+
+      const existing = await findUserProviderById(d1Client, userId, id)
+      if (!existing) {
+        return reply.code(404).send({ success: false, message: 'Provider not found' })
+      }
+
+      const apiKeyEncrypted = encrypt(apiKey, config.auth.jwtSecret)
+      const updatedAt = Date.now()
+      const updatedProvider: AIProviderConfig = {
+        ...existing,
+        name,
+        type,
+        apiKeyEncrypted,
+        baseUrl,
+        model,
+        isDefault: isDefault ?? existing.isDefault,
+        updatedAt
+      }
+
+      const ok = await updateProvider(d1Client, updatedProvider)
+      if (!ok) {
+        return reply.code(404).send({ success: false, message: 'Provider not found' })
+      }
+
+      providerRegistry.clearCache(userId, id)
+
+      return {
+        success: true,
+        data: toProviderDTO(updatedProvider)
       }
     }
   )
@@ -134,17 +209,11 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
       const userId = req.user.sub
       const { id } = req.params
 
-      const providers = userProviders.get(userId)
-      if (!providers) {
+      const removed = await deleteProvider(d1Client, userId, id)
+      if (!removed) {
         return reply.code(404).send({ success: false, message: 'Provider not found' })
       }
 
-      const index = providers.findIndex(p => p.id === id)
-      if (index === -1) {
-        return reply.code(404).send({ success: false, message: 'Provider not found' })
-      }
-
-      providers.splice(index, 1)
       providerRegistry.clearCache(userId, id)
 
       return { success: true }
@@ -191,15 +260,14 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
       }
 
       // Get provider
-      let providerConfig: AIProviderConfig | undefined
+      let providerConfig: AIProviderConfig | null = null
 
       if (providerId) {
-        const providers = userProviders.get(userId)
-        providerConfig = providers?.find(p => p.id === providerId)
+        providerConfig = await findUserProviderById(d1Client, userId, providerId)
       } else {
-        // Use default provider
-        const providers = userProviders.get(userId)
-        providerConfig = providers?.find(p => p.isDefault) || providers?.[0]
+        providerConfig =
+          (await findUserDefaultProvider(d1Client, userId)) ||
+          (await findUserFirstProvider(d1Client, userId))
       }
 
       if (!providerConfig) {
@@ -333,8 +401,7 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
       const userId = req.user.sub
       const { id } = req.params
 
-      const providers = userProviders.get(userId)
-      const providerConfig = providers?.find(p => p.id === id)
+      const providerConfig = await findUserProviderById(d1Client, userId, id)
 
       if (!providerConfig) {
         return reply.code(404).send({ success: false, message: 'Provider not found' })
@@ -394,21 +461,34 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
       }
 
       // Get provider
-      const envApiKey = process.env.AI_OPENAI_API_KEY
-      if (!envApiKey) {
-        return reply.code(400).send({
-          success: false,
-          code: 'NO_PROVIDER',
-          message: '请先配置 AI 服务'
-        })
-      }
+      const userProvider =
+        (await findUserDefaultProvider(d1Client, userId)) ||
+        (await findUserFirstProvider(d1Client, userId))
 
-      const tempProvider = new OpenAIProvider()
-      tempProvider.initialize({
-        apiKey: envApiKey,
-        baseUrl: process.env.AI_OPENAI_BASE_URL,
-        model: process.env.AI_OPENAI_MODEL
-      })
+      let provider: AIProvider
+      let providerIdForUsage = 'system'
+
+      if (userProvider) {
+        provider = providerRegistry.getProvider(userProvider)
+        providerIdForUsage = userProvider.id
+      } else {
+        const envApiKey = process.env.AI_OPENAI_API_KEY
+        if (!envApiKey) {
+          return reply.code(400).send({
+            success: false,
+            code: 'NO_PROVIDER',
+            message: '请先配置 AI 服务'
+          })
+        }
+
+        const tempProvider = new OpenAIProvider()
+        tempProvider.initialize({
+          apiKey: envApiKey,
+          baseUrl: process.env.AI_OPENAI_BASE_URL,
+          model: process.env.AI_OPENAI_MODEL
+        })
+        provider = tempProvider
+      }
 
       // TODO: MCP tools will be used for tool calling support
       // const { mcpTools, executeMcpTool } = await import('../lib/mcp-tools.js')
@@ -483,14 +563,14 @@ const aiRoutes: FastifyPluginAsyncZod = async app => {
 
         // For now, use chatComplete (non-streaming)
         // TODO: Add streaming support with SSE
-        const result = await tempProvider.chatComplete(allMessages, {
+        const result = await provider.chatComplete(allMessages, {
           temperature: 0.7,
           maxTokens: 1000
         })
 
         // Consume rate limit and record usage
         consumeRateLimit(userId)
-        recordUsage(userId, 'system', 'chat', result.meta.totalTokens || 0)
+        recordUsage(userId, providerIdForUsage, 'chat', result.meta.totalTokens || 0)
 
         return {
           success: true,

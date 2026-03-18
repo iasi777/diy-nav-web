@@ -104,6 +104,10 @@
               <i class="fas fa-exchange-alt" />
               数据管理
             </BaseButton>
+            <BaseButton variant="ghost" block class="dropdown-item" @click="onOpenAISettings">
+              <i class="fas fa-robot" />
+              AI 配置
+            </BaseButton>
             <BaseButton variant="ghost" block class="dropdown-item" @click="onOpenSettings">
               <i class="fas fa-cog" />
               设置
@@ -136,7 +140,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { useAuthStore } from '@/stores/auth'
 import { BaseButton } from '@nav/ui'
 
-const emit = defineEmits(['addSite', 'openSettings', 'openDataManagement'])
+const emit = defineEmits(['addSite', 'openSettings', 'openDataManagement', 'openAiSettings'])
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
@@ -166,6 +170,10 @@ const onOpenSettings = () => {
 }
 const onOpenDataManagement = () => {
   emit('openDataManagement')
+  showSettingsDropdown.value = false
+}
+const onOpenAISettings = () => {
+  emit('openAiSettings')
   showSettingsDropdown.value = false
 }
 const handleLogout = () => {

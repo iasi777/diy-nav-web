@@ -4,6 +4,7 @@
       @add-site="handleAddSite"
       @open-settings="openSettingsModal"
       @open-data-management="openDataManagement"
+      @open-ai-settings="openAISettings"
     />
     <main class="main-content">
       <div class="container">
@@ -62,6 +63,16 @@
       <DataManagementModal @close="() => uiStore.closeModal('dataManagement')" />
     </BaseModal>
 
+    <BaseModal
+      v-if="uiStore.modalState.aiSettings"
+      :is-open="uiStore.modalState.aiSettings"
+      title="AI 配置"
+      size="lg"
+      @close="() => uiStore.closeModal('aiSettings')"
+    >
+      <AIConfigModal @close="() => uiStore.closeModal('aiSettings')" />
+    </BaseModal>
+
     <ToastContainer />
 
     <!-- Sync Loading Indicator -->
@@ -91,7 +102,6 @@
 import { computed, ref, watch } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { useWebsiteStore } from '@/stores/website'
-import { useAuthStore } from '@/stores/auth'
 import { BaseModal } from '@nav/ui'
 import HeaderBar from '@/components/header/HeaderBar.vue'
 import AddSiteModal from '@/components/modals/AddSiteModal.vue'
@@ -99,11 +109,11 @@ import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal.vue
 import ManageTagsModal from '@/components/modals/ManageTagsModal.vue'
 import SettingsModal from '@/components/modals/SettingsModal.vue'
 import DataManagementModal from '@/components/modals/DataManagementModal.vue'
+import AIConfigModal from '@/components/modals/AIConfigModal.vue'
 import ToastContainer from '@/components/toast/ToastContainer.vue'
 
 const uiStore = useUIStore()
 const websiteStore = useWebsiteStore()
-const authStore = useAuthStore()
 
 const addSiteTitle = computed(() => {
   return uiStore.getModalData('addSite')?.website ? '编辑网站' : '添加网站'
@@ -119,6 +129,7 @@ const closeAddSite = () => {
 
 const openSettingsModal = () => uiStore.openModal('settings')
 const openDataManagement = () => uiStore.openModal('dataManagement')
+const openAISettings = () => uiStore.openModal('aiSettings')
 
 // Sync State Management with "Success" feedback
 type SyncState = 'hidden' | 'syncing' | 'success'

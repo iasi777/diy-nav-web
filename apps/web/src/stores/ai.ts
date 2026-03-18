@@ -7,11 +7,14 @@ import { defineStore } from 'pinia'
 import { ref, computed, readonly } from 'vue'
 import {
   getAIProviders,
+  getAIProvider,
   addAIProvider,
+  updateAIProvider,
   deleteAIProvider,
   getAIUsage,
   sendChatMessage,
   type AIProvider,
+  type AIProviderDetail,
   type AIProviderInput,
   type AIUsageStats,
   type ChatMessage
@@ -59,7 +62,45 @@ export const useAIStore = defineStore('ai', () => {
     error.value = null
     try {
       const provider = await addAIProvider(input)
+      if (provider.isDefault) {
+        providers.value.forEach(p => {
+          p.isDefault = false
+        })
+      }
       providers.value.push(provider)
+      return provider
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Get provider detail
+   */
+  async function loadProviderDetail(id: string): Promise<AIProviderDetail> {
+    return getAIProvider(id)
+  }
+
+  /**
+   * Update provider
+   */
+  async function updateProvider(id: string, input: AIProviderInput) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const provider = await updateAIProvider(id, input)
+      if (provider.isDefault) {
+        providers.value.forEach(p => {
+          p.isDefault = false
+        })
+      }
+      const index = providers.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        providers.value[index] = provider
+      }
       return provider
     } catch (e) {
       error.value = (e as Error).message
@@ -293,7 +334,9 @@ export const useAIStore = defineStore('ai', () => {
 
     // Actions
     loadProviders,
+    loadProviderDetail,
     addProvider,
+    updateProvider,
     removeProvider,
     loadUsage,
     clearState,

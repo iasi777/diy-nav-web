@@ -16,6 +16,10 @@ export interface AIProvider {
   createdAt: number
 }
 
+export interface AIProviderDetail extends AIProvider {
+  apiKey: string
+}
+
 export interface AIProviderInput {
   name: string
   type: AIProvider['type']
@@ -60,6 +64,28 @@ export async function addAIProvider(provider: AIProviderInput): Promise<AIProvid
     return res.data
   }
   throw new Error(res.message || 'Failed to add AI provider')
+}
+
+/**
+ * Get AI provider detail (includes apiKey)
+ */
+export async function getAIProvider(id: string): Promise<AIProviderDetail> {
+  const res = await request.get<AIProviderDetail>(`/api/ai/providers/${id}`)
+  if (res.success && res.data) {
+    return res.data
+  }
+  throw new Error(res.message || 'Failed to get AI provider')
+}
+
+/**
+ * Update an AI provider
+ */
+export async function updateAIProvider(id: string, provider: AIProviderInput): Promise<AIProvider> {
+  const res = await request.patch<AIProvider>(`/api/ai/providers/${id}`, provider)
+  if (res.success && res.data) {
+    return res.data
+  }
+  throw new Error(res.message || 'Failed to update AI provider')
 }
 
 /**

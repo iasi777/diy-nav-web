@@ -5,6 +5,7 @@ import { createStorageClientFromEnv, type R2Config } from '@nav/storage'
 import { BackupService, AuthService, AvatarService } from '@nav/core'
 import { config, loadRawConfig } from '@nav/config'
 import { IconService, getProviders } from '@nav/icon-core'
+import { initAIProviderTable } from './lib/ai-provider-store.js'
 
 // --- Database Client ---
 export const d1Client = new D1Client({
@@ -65,6 +66,7 @@ export const initServices = async (logger: FastifyBaseLogger): Promise<void> => 
   try {
     await backupService.initTable()
     await authService.initTable()
+    await initAIProviderTable(d1Client)
     logger.info('Services initialized')
   } catch (err) {
     logger.error({ err }, 'Failed to init services')

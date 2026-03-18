@@ -181,6 +181,14 @@ class HttpClient {
     return this.http<T>(endpoint, { method: 'PUT', body: JSON.stringify(body), ...options })
   }
 
+  patch<T, B = unknown>(
+    endpoint: string,
+    body?: B,
+    options?: Omit<RequestOptions, 'method' | 'body'>
+  ) {
+    return this.http<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body), ...options })
+  }
+
   delete<T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) {
     return this.http<T>(endpoint, { method: 'DELETE', ...options })
   }

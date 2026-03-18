@@ -23,6 +23,7 @@ export interface ModalState {
   manageTags: boolean
   settings: boolean
   dataManagement: boolean
+  aiSettings: boolean
   syncConflict: boolean
 }
 
@@ -41,6 +42,7 @@ export interface ModalPayloads {
   manageTags?: undefined
   settings?: undefined
   dataManagement?: undefined
+  aiSettings?: undefined
   syncConflict?: { localCount: number; remoteCount: number; remoteDate: Date }
 }
 

@@ -9,6 +9,7 @@ export const useUIStore = defineStore('ui', () => {
     manageTags: false,
     settings: false,
     dataManagement: false,
+    aiSettings: false,
     syncConflict: false
   })
 
@@ -60,6 +61,7 @@ export const useUIStore = defineStore('ui', () => {
   }
 
   const showLoading = (message?: string) => {
+    void message
     isLoading.value = true
     return {
       close: () => {

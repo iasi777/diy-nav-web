@@ -67,65 +67,18 @@
             class="user-avatar-btn"
             @click="toggleSettingsDropdown"
           >
-            <img
-              v-if="authStore.isAuthenticated && authStore.user?.avatar_url"
-              :src="authStore.user.avatar_url"
-              class="user-avatar"
-              alt="User Avatar"
-            />
-            <div v-else-if="authStore.isAuthenticated" class="user-avatar">
-              {{ (authStore.user?.nickname || authStore.user?.email || '?')?.[0]?.toUpperCase() }}
-            </div>
-            <i v-else class="fas fa-cog" />
+            <i class="fas fa-cog" />
           </BaseButton>
 
           <div v-if="showSettingsDropdown" class="dropdown-menu" role="menu">
-            <!-- Guest: Login Option -->
-            <template v-if="!authStore.isAuthenticated">
-              <BaseButton
-                variant="ghost"
-                block
-                class="dropdown-item text-primary"
-                @click="router.push('/login')"
-              >
-                <i class="fas fa-sign-in-alt" />
-                登录 / 注册
-              </BaseButton>
-              <div class="dropdown-divider" />
-            </template>
-
-            <!-- User Info Header -->
-            <div v-if="authStore.isAuthenticated" class="dropdown-header">
-              <div class="user-email">{{ authStore.user?.nickname || authStore.user?.email }}</div>
-            </div>
-
-            <!-- Common Options -->
             <BaseButton variant="ghost" block class="dropdown-item" @click="onOpenDataManagement">
               <i class="fas fa-exchange-alt" />
-              数据管理
-            </BaseButton>
-            <BaseButton variant="ghost" block class="dropdown-item" @click="onOpenAISettings">
-              <i class="fas fa-robot" />
-              AI 配置
+              导入 / 导出
             </BaseButton>
             <BaseButton variant="ghost" block class="dropdown-item" @click="onOpenSettings">
               <i class="fas fa-cog" />
               设置
             </BaseButton>
-
-            <!-- User: Logout Option -->
-            <template v-if="authStore.isAuthenticated">
-              <div class="dropdown-divider" />
-              <BaseButton
-                variant="ghost"
-                block
-                class="dropdown-item text-danger"
-                @click="handleLogout"
-              >
-                <i class="fas fa-sign-out-alt" />
-                退出登录
-              </BaseButton>
-            </template>
           </div>
         </div>
       </div>
@@ -135,15 +88,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
-import { useAuthStore } from '@/stores/auth'
 import { BaseButton } from '@nav/ui'
 
-const emit = defineEmits(['addSite', 'openSettings', 'openDataManagement', 'openAiSettings'])
-const router = useRouter()
+const emit = defineEmits(['addSite', 'openSettings', 'openDataManagement'])
 const settingsStore = useSettingsStore()
-const authStore = useAuthStore()
 
 const currentTheme = computed(() => settingsStore.settings.theme)
 const themeToggleIcon = computed(() =>
@@ -172,16 +121,6 @@ const onOpenDataManagement = () => {
   emit('openDataManagement')
   showSettingsDropdown.value = false
 }
-const onOpenAISettings = () => {
-  emit('openAiSettings')
-  showSettingsDropdown.value = false
-}
-const handleLogout = () => {
-  authStore.logout()
-  showSettingsDropdown.value = false
-  router.push('/login')
-}
-
 const cycleTheme = () => {
   const order: Array<'light' | 'dark' | 'auto'> = ['light', 'dark', 'auto']
   const next = order[(order.indexOf(currentTheme.value) + 1) % order.length]

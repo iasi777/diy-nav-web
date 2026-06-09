@@ -153,14 +153,14 @@ watch(
 const emptyText = computed(() => (props.fixedView === 'recent' ? '暂无最近使用' : '暂无常用网站'))
 
 const onVisit = (website: Website) => {
-  websiteStore.incrementVisitCount(website.id)
+  void websiteStore.incrementVisitCount(website.id)
   window.open(website.url, '_blank', 'noopener,noreferrer')
 }
 
 const onFavoriteToggle = (id: string) => {
   const w = websiteStore.websites.find(x => x.id === id)
   if (!w) return
-  websiteStore.updateWebsite(id, { isFavorite: !w.isFavorite })
+  void websiteStore.updateWebsite(id, { isFavorite: !w.isFavorite }).catch(() => undefined)
 }
 
 const goPrev = () => {

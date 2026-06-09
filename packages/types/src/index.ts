@@ -14,6 +14,7 @@ export interface Website {
   updatedAt: Date
   order?: number
   favoriteOrder?: number
+  version: number
 }
 
 export interface Category {
@@ -25,6 +26,7 @@ export interface Category {
   websiteCount: number
   createdAt: Date
   updatedAt: Date
+  version: number
 }
 
 export interface Tag {
@@ -35,11 +37,11 @@ export interface Tag {
   usageCount: number
   createdAt: Date
   updatedAt: Date
+  version: number
 }
 
 export interface UserSettings {
   theme: 'light' | 'dark' | 'auto'
-  autoBackup: boolean
   defaultHome?: 'home' | 'all'
 }
 

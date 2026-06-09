@@ -5,11 +5,6 @@
     { "path": "./apps/api" },
     { "path": "./packages/ui" },
     { "path": "./packages/config" },
-    { "path": "./packages/icon-core" },
-    { "path": "./packages/core" },
-    { "path": "./packages/database" },
-    { "path": "./packages/storage" },
-    { "path": "./packages/auth-providers" },
     { "path": "./packages/utils" }
   ]
 }

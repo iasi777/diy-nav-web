@@ -8,7 +8,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@8.8.0 --activate
 
 # Copy pruned json files (package.json, pnpm-lock.yaml)
 COPY --from=prune /app/out/json/ .
@@ -25,8 +25,6 @@ COPY --from=prune /app/tsup.config.ts .
 
 # Build Args
 ARG VITE_API_BASE_URL
-ARG VITE_LINUX_DO_CLIENT_ID
-ARG VITE_LINUX_DO_REDIRECT_URI
 
 # Build
 RUN npx turbo run build --filter=web...

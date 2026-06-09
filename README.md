@@ -1,235 +1,206 @@
-# DIY NAV WEB (diy-nav-web)
+# diy-nav-web 私有书签中心
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
-[![Vue 3](https://img.shields.io/badge/Vue-3.0-green)](https://vuejs.org/)
-[![Fastify](https://img.shields.io/badge/Fastify-4.0-black)](https://www.fastify.io/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![web](https://img.shields.io/badge/Web-Online-orange)](https://1ddh.cn)
+这是基于 `slightlee/diy-nav-web` 的单用户私有分支。书签、分类、标签和导入任务统一存储在 ARM VPS 的 SQLite 中，tailnet 内所有设备实时共享，不再使用浏览器 `localStorage`、Cloudflare D1/R2、OAuth 或应用登录。
 
-> **轻量、极速、可定制的现代化个人导航管理平台。**
->
-> _A lightweight, fast, and customizable modern personal navigation management platform._
->
-> 🔗 **在线演示**: [https://1ddh.cn](https://1ddh.cn)
+上游固定版本见 [UPSTREAM.md](UPSTREAM.md)。
 
----
+运行故障处理见 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)。
 
-## 📖 简介 (Introduction)
+## 功能
 
-**DIY NAV WEB** 是一个专为追求极致体验的开发者和团队设计的导航管理工具。它不仅仅是一个书签管理器，更是一个高性能、可扩展的资源中心。
+- SQLite WAL 中心库，书签/分类/标签完整 CRUD。
+- 每条记录带 `version`，旧设备提交过期数据时返回 `409 VERSION_CONFLICT`。
+- 导入浏览器 Netscape Bookmark HTML 和项目 JSON。
+- 上传后预览有效、重复、异常链接，保留文件名、文件夹路径和标题。
+- 通过服务端 new-api 网关生成精简分类体系、单个复用标签和简短中文描述。
+- AI 分类任务持久化，API 重启后恢复；输出经过 JSON Schema 和 Zod 校验。
+- 支持状态筛选、逐条审核、批量分类/标签、批量排除，并在单个 SQLite 事务中提交。
+- JSON 导出、SQLite 一致性快照、SHA-256、12 份轮转和恢复校验。
+- API 不映射宿主机端口；Web 仅绑定 Tailscale IP。
 
-采用 **Monorepo** 架构，前端基于 **Vue 3 + Vite**，后端采用 **Fastify**，底层数据存储无缝集成 **Cloudflare D1 & R2**，为您提供企业级的性能与安全性。
+## 技术栈
 
-## ✨ 核心特性 (Features)
+- Node.js 20
+- pnpm 8.8.0
+- Vue 3 + Vite + Pinia
+- Fastify 5 + Zod
+- better-sqlite3
+- Docker Compose
 
-| 特性            | 说明                                                       |
-| :-------------- | :--------------------------------------------------------- |
-| 🎨 **精美 UI**  | 现代化卡片式设计，响应式布局，完美适配桌面与移动端。       |
-| 🔐 **数据安全** | 支持 **Cloudflare R2** 自动与手动云备份，数据永不丢失。    |
-| 🔍 **智能检索** | 支持按名称、描述、分类、标签进行毫秒级实时搜索。           |
-| 🏷 **灵活分类** | 强大的多标签与分类系统，支持拖拽排序。                     |
-| ☁️ **云原生**   | 原生支持 Cloudflare D1 (SQL) 和 R2 (Object Storage) 部署。 |
-| 🤖 **AI 助手**  | 智能对话管理网站，自动获取图标、生成描述、推断分类标签。   |
+## 架构
 
-## 📸 预览 (Screenshots)
+```mermaid
+flowchart LR
+  A[Tailnet 浏览器设备] -->|100.87.23.114:8090| W[Nginx Web]
+  W -->|Docker 内网 /api| API[Fastify API :8787]
+  API --> DB[(SQLite WAL Volume)]
+  API --> BK[(Backup Volume)]
+  API -->|服务端 Key| AI[new-api /v1]
+  Internet[公网] -. 不允许访问 .-> W
+```
 
-### 核心页面 (Core)
+API 不发布宿主机端口。公网隔离仍需同时由 Tailscale 地址绑定、防火墙和云安全组保证。
 
-|               首页               |                  全部                  |
-| :------------------------------: | :------------------------------------: |
-| ![首页概览](doc/images/home.png) | ![All Sites](doc/images/all-sites.png) |
-
-### 更多截图 (More)
-
-|            登录页面            |               注册页面               |
-| :----------------------------: | :----------------------------------: |
-| ![Login](doc/images/login.png) | ![Register](doc/images/register.png) |
-
-|               备份               |            首页（移动端）             |               全部（移动端）               |
-| :------------------------------: | :-----------------------------------: | :----------------------------------------: |
-| ![Login](doc/images/backups.png) | ![Backups](doc/images/home-phone.png) | ![Backups](doc/images/all-sites-phone.png) |
-
-|          AI助手页面           |         AI助手-添加网站          |
-| :---------------------------: | :------------------------------: |
-| ![Login](doc/images/ai-1.png) | ![Register](doc/images/ai-2.png) |
-
-|       AI助手-网站添加标签       |         AI助手-备份数据         |       AI助手-查看备份数据       |
-| :-----------------------------: | :-----------------------------: | :-----------------------------: |
-| ![Login](doc/images/ai-2-1.png) | ![Backups](doc/images/ai-3.png) | ![Backups](doc/images/ai-4.png) |
-
-## 🛠 技术栈 (Tech Stack)
-
-本项目采用现代化的全栈技术架构：
-
-- **Frontend**: [Vue 3](https://vuejs.org/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/), [Pinia](https://pinia.vuejs.org/), [SCSS](https://sass-lang.com/)
-- **Backend**: [Node.js](https://nodejs.org/), [Fastify](https://www.fastify.io/), [Zod](https://zod.dev/)
-- **AI**: OpenAI Compatible API, 多 Provider 支持 (OpenAI/Claude/Qwen/文心一言)
-- **Infrastructure**: [Cloudflare D1](https://developers.cloudflare.com/d1/), [Cloudflare R2](https://developers.cloudflare.com/r2/)
-- **Tooling**: [pnpm](https://pnpm.io/) (Monorepo), [TurboRepo](https://turbo.build/), [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
-
-## 🚀 快速开始 (Getting Started)
-
-### 前置要求 (Prerequisites)
-
-- **Node.js**: >= 18.0.0
-- **pnpm**: >= 8.0.0
-
-### 安装 (Installation)
+## 本地开发
 
 ```bash
-# 克隆仓库
-git clone https://github.com/slightlee/diy-nav-web.git
-
-# 进入目录
-cd diy-nav-web
-
-# 安装依赖
+nvm use
+corepack enable
+corepack prepare pnpm@8.8.0 --activate
 pnpm install
+cp .env.example .env
+pnpm dev
 ```
 
-### 开发 (Development)
+访问入口：
 
-1.  **配置环境**
+- Web: `http://127.0.0.1:3000`
+- SQLite: `./data/diy-nav.sqlite`
 
-    复制环境变量示例文件（开发环境同样需要）：
+本地开发时，Web 会将 `/api` 请求代理到后端服务，无需直接访问 API 端口。
 
-    ```bash
-    cp .env.example .env
-    ```
+`.env` 中的 new-api 配置只由 API 读取：
 
-    **环境变量配置说明：**
+```dotenv
+AI_NEW_API_BASE_URL=http://<new-api-tailnet-ip>:<port>/v1
+AI_NEW_API_KEY=<server-only-key>
+AI_DEFAULT_MODEL=
+```
 
-    请打开 `.env` 文件并根据下表修改关键配置。本项目依赖 Cloudflare D1 和 R2，请确保即使在本地开发时也填入正确的密钥（或使用本地模拟器）。
+浏览器不会收到 `AI_NEW_API_KEY`。没有配置 AI 时，中心库和手工导入审核仍可使用。
 
-    | 变量名                         |  必填  | 说明                                                  |
-    | :----------------------------- | :----: | :---------------------------------------------------- |
-    | **基础配置**                   |        |                                                       |
-    | `NODE_ENV`                     |   是   | 环境模式 (development/production)                     |
-    | `APP_PORT`                     |   是   | API 服务端口，默认 `8787`                             |
-    | **Cloudflare 配置**            |        |                                                       |
-    | `STORAGE_R2_ACCOUNT_ID`        | **是** | Cloudflare Account ID (R2 和 D1 共用)                 |
-    | `STORAGE_R2_ENDPOINT`          | **是** | R2 API Endpoint                                       |
-    | `STORAGE_R2_ACCESS_KEY_ID`     | **是** | R2 Access Key                                         |
-    | `STORAGE_R2_SECRET_ACCESS_KEY` | **是** | R2 Secret Key                                         |
-    | `DB_D1_API_TOKEN`              | **是** | Cloudflare API Token (需 D1 读写权限)                 |
-    | `DB_D1_DATABASE_ID`            | **是** | D1 数据库 ID                                          |
-    | **存储配置**                   |        |                                                       |
-    | `PUBLIC_STORAGE_PROVIDER`      |   是   | 公开资源存储: `r2` / `local` (s3 计划支持中)          |
-    | `BACKUP_STORAGE_PROVIDER`      |   是   | 备份存储: `r2` / `webdav`                             |
-    | `STORAGE_BUCKET`               | **是** | R2/S3 存储桶名称                                      |
-    | `STORAGE_PUBLIC_BASE_URL`      | **是** | R2 绑定的公开访问域名 (例如 `https://r2.example.com`) |
-    | **WebDAV 配置 (可选)**         |        | 当 `BACKUP_STORAGE_PROVIDER=webdav` 时使用            |
-    | `WEBDAV_URL`                   |   否   | WebDAV 服务地址 (如坚果云、Nextcloud)                 |
-    | `WEBDAV_USERNAME`              |   否   | WebDAV 用户名                                         |
-    | `WEBDAV_PASSWORD`              |   否   | WebDAV 密码                                           |
-    | **认证 (Auth)**                |        |                                                       |
-    | `JWT_SECRET`                   | **是** | JWT 签名密钥 (生产环境必须 32 位以上)                 |
-    | **AI 助手**                    |        |                                                       |
-    | `AI_OPENAI_API_KEY`            |   否   | OpenAI 兼容 API Key（启用 AI 助手功能）               |
-    | `AI_OPENAI_BASE_URL`           |   否   | 自定义 API 地址（如使用 Claude/通义千问等）           |
-    | `AI_OPENAI_MODEL`              |   否   | 模型名称，默认 `gpt-4o-mini`                          |
-    | **第三方登录 (OAuth)**         |        |                                                       |
-    | `VITE_LINUX_DO_CLIENT_ID`      |   否   | Linux Do OAuth Client ID (前端)                       |
-    | `LINUX_DO_CLIENT_ID`           |   否   | Linux Do OAuth Client ID (后端)                       |
-    | `LINUX_DO_CLIENT_SECRET`       |   否   | Linux Do OAuth Secret (后端)                          |
-    | `LINUX_DO_REDIRECT_URI`        |   否   | Linux Do OAuth 回调地址                               |
-    | `VITE_GITHUB_CLIENT_ID`        |   否   | GitHub OAuth Client ID (前端)                         |
-    | `GITHUB_CLIENT_ID`             |   否   | GitHub OAuth Client ID (后端)                         |
-    | `GITHUB_CLIENT_SECRET`         |   否   | GitHub OAuth Secret (后端)                            |
-    | `GITHUB_REDIRECT_URI`          |   否   | GitHub OAuth 回调地址                                 |
-    | `VITE_GOOGLE_CLIENT_ID`        |   否   | Google OAuth Client ID (前端)                         |
-    | `GOOGLE_CLIENT_ID`             |   否   | Google OAuth Client ID (后端)                         |
-    | `GOOGLE_CLIENT_SECRET`         |   否   | Google OAuth Secret (后端)                            |
-    | `GOOGLE_REDIRECT_URI`          |   否   | Google OAuth 回调地址                                 |
+## API
 
-    > ⚠️ **注意**: `packages` 目录下的内部包构建依赖完整的环境配置，如果配置不完整可能会导致部分功能异常。
+主要端点：
 
-2.  **启动服务**
+| 方法           | 路径                             | 用途                   |
+| -------------- | -------------------------------- | ---------------------- |
+| `GET/POST`     | `/api/bookmarks`                 | 列表、新建书签         |
+| `PATCH/DELETE` | `/api/bookmarks/:id`             | 带版本更新、删除       |
+| `GET/POST`     | `/api/categories`                | 分类 CRUD              |
+| `GET/POST`     | `/api/tags`                      | 标签 CRUD              |
+| `POST`         | `/api/imports`                   | 上传文件内容并生成预览 |
+| `PUT`          | `/api/imports/:id/taxonomy`      | 确认分类体系           |
+| `POST`         | `/api/imports/:id/classify`      | 启动持久化 AI 分类任务 |
+| `PATCH`        | `/api/imports/:id/items/:itemId` | 审核单条记录           |
+| `POST`         | `/api/imports/:id/commit`        | 事务提交审核结果       |
+| `GET`          | `/api/ai/models`                 | 从 new-api 获取模型    |
+| `GET`          | `/api/export/json`               | 版本化 JSON 导出       |
+| `GET`          | `/api/metrics`                   | 非敏感运行指标         |
+| `GET`          | `/healthz`, `/readyz`            | 进程与 SQLite 健康检查 |
 
-    本项目使用 `pnpm` workspace 管理，可一键启动全栈开发环境：
+## ARM VPS 部署
 
-    ```bash
-    # 同时启动 Web 和 API
-    pnpm dev
-    ```
-
-3.  **访问应用**
-    - **Web**: [http://localhost:3000](http://localhost:3000)
-    - **API**: [http://localhost:8787](http://localhost:8787)
-
-### 构建 (Build)
+目标地址固定为 `100.87.23.114:8090`。`8080` 和 `8787` 不会占用宿主机端口。
 
 ```bash
-# 构建所有应用和包
-pnpm build
+cp .env.example .env
+chmod 600 .env
+sh deploy/deploy.sh
 ```
 
-## 🚢 部署 (Deployment)
+Compose 行为：
 
-### Docker 部署 (推荐)
+- Web: `${TAILSCALE_IP:-100.87.23.114}:${WEB_PORT:-8090}:80`
+- API: 仅 `expose: 8787`，只在 Compose 网络中可见
+- SQLite/WAL: `diy-nav-data` volume
+- 快照/JSON: `diy-nav-backups` volume
+- 重启策略: `unless-stopped`
+- 日志轮转: 3 x 10 MB
+- API: Node 20 Debian slim，支持 x86_64/ARM64 原生 SQLite 构建
 
-本项目提供了一键部署脚本，基于 Docker Compose 快速拉起完整服务。
+验证：
 
-1.  **配置环境变量**
+```bash
+docker compose -f deploy/docker-compose.yml ps
+curl http://100.87.23.114:8090/api/bookmarks
+ss -lnt | grep -E '(:8090|:8787)'
+```
 
-    复制示例配置文件并修改必要的配置（如端口、密钥等）：
+预期只有 `100.87.23.114:8090` 对外监听，没有宿主机 `8787`。还应在 VPS 防火墙/云安全组中拒绝公网访问 `8090`。
 
-    ```bash
-    cp .env.example .env
-    # vim .env
-    ```
+## 备份
 
-2.  **执行部署脚本**
+手工创建 SQLite 一致性快照、JSON 导出和 SHA-256：
 
-    ```bash
-    sh deploy/deploy.sh
-    ```
+```bash
+sh deploy/backup.sh
+```
 
-    脚本会自动构建镜像并启动服务。
-    - **Web**: `http://localhost:3000`
-    - **API**: `http://localhost:8787`
+容器内 `/backups` 只保留最近 12 组文件。安装 VPS 定时器后，每月 1 日和 16 日执行：
 
-## 🗺 路线图 (Roadmap)
+```bash
+sudo cp deploy/systemd/diy-nav-backup.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now diy-nav-backup.timer
+```
 
-### ✅ 已完成
+检查：
 
-- [x] 基础导航管理（增删改查、拖拽排序）
-- [x] 分类与标签管理
-- [x] 深色/浅色/自动主题切换
-- [x] 数据导入/导出 (JSON)
-- [x] Cloudflare R2 云端备份
-- [x] WebDAV 备份支持（坚果云、Nextcloud 等）
-- [x] 多用户系统（注册/登录）
-- [x] 第三方登录（Linuxdo / GitHub / Google）
-- [x] Docker 容器化部署
-- [x] **AI 智能助手**
-  - 自然语言管理网站、分类、标签、数据备份
-  - 智能添加网站（自动获取图标、生成描述、推断分类以及标签）
-  - 支持 OpenAI 兼容 API
+```bash
+systemctl list-timers diy-nav-backup.timer
+docker exec diy-nav-api ls -lh /backups
+```
 
-### 🚧 规划中
+## 本地副本
 
-- [ ] AWS S3 存储支持
-- [ ] 自定义AI服务商（支持多 Provider 配置持久化）
-- [ ] 快捷键支持
-- [ ] 首页小组件（可拖拽自定义布局）
-- [ ] 网站健康检测（自动检查链接有效性）
+脚本通过 Tailscale SSH 从容器拉取备份，并在本地保留 12 组：
 
-## 🤝 贡献指南 (Contributing)
+```bash
+DIY_NAV_REMOTE=root@100.87.23.114 sh deploy/local-backup-sync.sh
+```
 
-欢迎社区贡献！如果您有通过 Pull Request 贡献代码的意愿，请遵循以下步骤：
+安装 user timer：
 
-1.  **Fork** 本仓库。
-2.  创建一个新的特性分支 (`git checkout -b feature/AmazingFeature`)。
-3.  提交您的更改 (`git commit -m 'feat: Add some AmazingFeature'`)，请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
-4.  推送到分支 (`git push origin feature/AmazingFeature`)。
-5.  开启一个 **Pull Request**。
+```bash
+mkdir -p ~/.config/systemd/user
+cp deploy/systemd/diy-nav-local-sync.* ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now diy-nav-local-sync.timer
+```
 
-## ⭐ Star History
+`Persistent=true` 会在离线设备下次开机联网后补跑。
 
-[![Star History Chart](https://api.star-history.com/svg?repos=slightlee/diy-nav-web&type=Date)](https://star-history.com/#slightlee/diy-nav-web&Date)
+## 恢复
 
-## 📄 许可证 (License)
+先列出快照：
 
-本项目基于 [MIT 许可证](LICENSE) 开源。
+```bash
+docker exec diy-nav-api ls -1 /backups/'diy-nav-'*.sqlite
+```
+
+恢复指定快照：
+
+```bash
+sh deploy/restore.sh /backups/diy-nav-<timestamp>.sqlite
+```
+
+恢复脚本会：
+
+1. 在覆盖前执行快照 `integrity_check`。
+2. 停止 API，替换 SQLite 主文件并移除旧 WAL/SHM。
+3. 再次执行 `integrity_check`。
+4. 输出书签、分类、标签数量。
+5. 重启 API 和 Web。
+
+## 验证
+
+```bash
+pnpm --filter api test
+pnpm type-check
+pnpm build
+docker compose -f deploy/docker-compose.yml config
+```
+
+测试覆盖 HTML/JSON 解析、URL 规范化、重复检测、迁移、CRUD、版本冲突、导入预览和事务提交。
+
+## 安全边界
+
+- 本项目没有应用级认证，整个 tailnet 都拥有完整读写权限。
+- 不应通过公网反向代理或 `0.0.0.0:8090` 暴露。
+- API 和 SQLite 不映射宿主机端口。
+- `.env` 不进入镜像或 JSON 导出，AI Key 可独立轮换。
+
+## License
+
+MIT，沿用上游许可证。

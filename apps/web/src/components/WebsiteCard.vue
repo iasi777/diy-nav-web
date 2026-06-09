@@ -14,6 +14,7 @@
   >
     <!-- 拖拽手柄 (Top Right) -->
     <button
+      v-if="draggable"
       class="drag-handle"
       :aria-label="`拖拽排序：${website.name}`"
       title="拖拽排序"
@@ -146,7 +147,8 @@ const props = withDefaults(defineProps<Props>(), {
   clickable: true,
   size: 'md',
   showActions: true,
-  showActionsOnHover: true
+  showActionsOnHover: true,
+  draggable: true
 })
 
 const emit = defineEmits<Emits>()
@@ -163,6 +165,7 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
   showActions?: boolean
   showActionsOnHover?: boolean
+  draggable?: boolean
   highlight?: string
 }
 
@@ -255,6 +258,7 @@ const handleMouseLeave = () => {
 
 const handleWebsiteVisit = (event: MouseEvent) => {
   event.preventDefault()
+  if (!props.clickable) return
   visitWebsite()
 }
 
@@ -296,13 +300,13 @@ const handleKeydown = (event: KeyboardEvent) => {
       }
       break
     case 'e':
-      if (event.ctrlKey || event.metaKey) {
+      if (props.showActions && (event.ctrlKey || event.metaKey)) {
         event.preventDefault()
         handleEdit()
       }
       break
     case 'Delete':
-      if (event.shiftKey) {
+      if (props.showActions && event.shiftKey) {
         event.preventDefault()
         handleDelete()
       }

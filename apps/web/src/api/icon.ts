@@ -1,5 +1,9 @@
 import { request } from '@/utils/http'
-import type { GetIconResponse } from '@nav/icon-core'
+
+interface GetIconResponse {
+  url: string
+  source: string
+}
 
 export const getIcon = (params: { domain?: string; url?: string; refresh?: boolean }) => {
   const queryParams: Record<string, string | undefined> = {

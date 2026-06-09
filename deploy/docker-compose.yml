@@ -1,89 +1,70 @@
 services:
-  # 前端服务 (Web Application)
-  web:
-    image: nav-web:${TAG:-latest}
+  api:
+    image: diy-nav-api:${TAG:-latest}
     build:
-      context: ../
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: diy-nav-api
+    restart: unless-stopped
+    expose:
+      - '8787'
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 8787
+      DATABASE_PATH: /data/diy-nav.sqlite
+      BACKUP_DIR: /backups
+    volumes:
+      - nav-data:/data
+      - nav-backups:/backups
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8787/readyz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  web:
+    image: diy-nav-web:${TAG:-latest}
+    build:
+      context: ..
       dockerfile: apps/web/Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-        VITE_LINUX_DO_CLIENT_ID: ${VITE_LINUX_DO_CLIENT_ID}
-        VITE_LINUX_DO_REDIRECT_URI: ${VITE_LINUX_DO_REDIRECT_URI}
-    ports:
-      # 端口映射：主机 3000 -> 容器 80
-      - '3000:80'
-    # 容器名称：方便管理和查看日志
-    container_name: nav-web
-    # 重启策略：总是重启 (除非手动停止)
-    restart: always
+        VITE_API_BASE_URL: /api
+    container_name: diy-nav-web
+    restart: unless-stopped
     depends_on:
-      # 依赖 API 服务：等待 API 健康检查通过后再启动 Web
       api:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          # 资源限制：防止单容器耗尽宿主机资源
-          cpus: '0.50' # 限制使用 0.5 个 CPU 核
-          memory: 64M # Nginx 静态服务，极轻量
-    logging:
-      # 日志配置：防止日志文件无限增长导致磁盘爆满
-      driver: 'json-file'
-      options:
-        max-size: '10m' # 单个日志文件最大 10MB
-        max-file: '3' # 最多保留 3 个日志文件
-    volumes:
-      # 时区同步：挂载宿主机时区配置，确保日志时间正确
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-    healthcheck:
-      # 健康检查：每 30s 检查一次 Nginx 是否存活
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:80']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-
-  # 后端服务 (API Application)
-  api:
-    image: nav-api:${TAG:-latest}
-    build:
-      context: ../
-      dockerfile: apps/api/Dockerfile
     ports:
-      # 端口映射：主机 8787 -> 容器 8787
-      - '8787:8787'
-    container_name: nav-api
-    restart: always
-    # 禁用 IPv6，强制使用 IPv4（解决 Cloudflare CDN IPv6 连接超时问题）
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=1
-      - net.ipv6.conf.default.disable_ipv6=1
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 128M # 实际使用约40MB，预甙3倍余量
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - '${TAILSCALE_IP:-100.87.23.114}:${WEB_PORT:-8090}:80'
     healthcheck:
-      # 健康检查：访问 /healthz 接口（使用 127.0.0.1 避免 IPv6 解析问题）
-      test:
-        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:8787/healthz']
+      test: ['CMD', 'wget', '--quiet', '--spider', 'http://127.0.0.1/']
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
-    environment:
-      # 环境变量：生产环境模式，开启性能优化
-      - NODE_ENV=production
-      - PORT=8787
-    env_file:
-      # 加载根目录的 .env 文件
-      - ../.env
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  nav-data:
+    name: diy-nav-data
+  nav-backups:
+    name: diy-nav-backups

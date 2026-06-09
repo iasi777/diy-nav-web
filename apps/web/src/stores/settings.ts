@@ -4,7 +4,6 @@ import type { UserSettings } from '@/types'
 
 const DEFAULT_SETTINGS: UserSettings = {
   theme: 'auto',
-  autoBackup: true,
   defaultHome: 'home'
 }
 
@@ -20,7 +19,6 @@ export const useSettingsStore = defineStore('settings', () => {
         const parsed = JSON.parse(stored)
         settings.value = {
           theme: parsed.theme ?? DEFAULT_SETTINGS.theme,
-          autoBackup: parsed.autoBackup ?? DEFAULT_SETTINGS.autoBackup,
           defaultHome: parsed.defaultHome ?? DEFAULT_SETTINGS.defaultHome
         }
       } catch {
@@ -86,44 +84,10 @@ export const useSettingsStore = defineStore('settings', () => {
       const imported = JSON.parse(data)
       settings.value = {
         theme: imported.theme ?? DEFAULT_SETTINGS.theme,
-        autoBackup: imported.autoBackup ?? DEFAULT_SETTINGS.autoBackup,
         defaultHome: imported.defaultHome ?? DEFAULT_SETTINGS.defaultHome
       }
       saveToLocalStorage()
       applyTheme()
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const backupData = () => {
-    const backup = {
-      websites: localStorage.getItem('websites'),
-      categories: localStorage.getItem('categories'),
-      tags: localStorage.getItem('tags'),
-      settings: JSON.stringify(settings.value),
-      timestamp: new Date().toISOString()
-    }
-    return JSON.stringify(backup, null, 2)
-  }
-
-  const restoreData = (backupData: string) => {
-    try {
-      const backup = JSON.parse(backupData)
-      if (backup.websites) localStorage.setItem('websites', backup.websites)
-      if (backup.categories) localStorage.setItem('categories', backup.categories)
-      if (backup.tags) localStorage.setItem('tags', backup.tags)
-      if (backup.settings) {
-        const parsed = JSON.parse(backup.settings)
-        settings.value = {
-          theme: parsed.theme ?? DEFAULT_SETTINGS.theme,
-          autoBackup: parsed.autoBackup ?? DEFAULT_SETTINGS.autoBackup,
-          defaultHome: parsed.defaultHome ?? DEFAULT_SETTINGS.defaultHome
-        }
-        applyTheme()
-      }
-      saveToLocalStorage()
       return true
     } catch {
       return false
@@ -138,8 +102,6 @@ export const useSettingsStore = defineStore('settings', () => {
     setTheme,
     setDefaultHome,
     exportSettings,
-    importSettings,
-    backupData,
-    restoreData
+    importSettings
   }
 })

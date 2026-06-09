@@ -8,9 +8,7 @@ export const useUIStore = defineStore('ui', () => {
     manageCategories: false,
     manageTags: false,
     settings: false,
-    dataManagement: false,
-    aiSettings: false,
-    syncConflict: false
+    dataManagement: false
   })
 
   const modalData = ref<Partial<ModalPayloads>>({})

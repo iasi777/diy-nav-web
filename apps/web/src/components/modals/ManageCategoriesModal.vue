@@ -3,6 +3,22 @@
     <div class="modal-content-wrapper">
       <!-- Category List -->
       <div class="category-list-container">
+        <div v-if="categories.length > 0" class="bulk-management">
+          <label class="select-all">
+            <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
+            全选
+          </label>
+          <span>已选 {{ selectedIds.length }} 项</span>
+          <BaseButton
+            variant="danger"
+            size="sm"
+            :disabled="selectedIds.length === 0"
+            @click="confirmBulkDelete"
+          >
+            批量删除
+          </BaseButton>
+        </div>
+
         <!-- Empty State -->
         <EmptyState
           v-if="categories.length === 0"
@@ -51,6 +67,13 @@
 
             <!-- View Mode -->
             <div v-else class="category-item__content">
+              <label class="selection-checkbox" @click.stop>
+                <input
+                  type="checkbox"
+                  :checked="selectedIds.includes(category.id)"
+                  @change="toggleSelection(category.id)"
+                />
+              </label>
               <div class="category-item__drag-handle">
                 <i class="fas fa-grip-vertical" />
               </div>
@@ -110,19 +133,25 @@
     <!-- Delete Confirmation -->
     <BaseModal
       :is-open="showDeleteModal"
-      title="删除分类"
+      :title="categoryToDelete ? '删除分类' : '批量删除分类'"
       size="sm"
       @close="showDeleteModal = false"
     >
       <p class="delete-confirm-text">
-        确定要删除分类“{{ categoryToDelete?.name }}”吗？
+        {{
+          categoryToDelete
+            ? `确定要删除分类“${categoryToDelete.name}”吗？`
+            : `确定要删除选中的 ${selectedIds.length} 个分类吗？`
+        }}
         <br />
         <span class="text-danger">该分类下的网站将被移至“未分类”。</span>
       </p>
       <template #footer>
         <div class="modal-footer-actions">
           <BaseButton variant="ghost" @click="showDeleteModal = false">取消</BaseButton>
-          <BaseButton variant="danger" @click="handleDeleteCategory">删除</BaseButton>
+          <BaseButton variant="danger" :loading="deleting" @click="handleDeleteCategory">
+            删除
+          </BaseButton>
         </div>
       </template>
     </BaseModal>
@@ -133,12 +162,14 @@
 import { ref, computed } from 'vue'
 import { useCategoryStore } from '@/stores/category'
 import { useWebsiteStore } from '@/stores/website'
+import { useUIStore } from '@/stores/ui'
 import { BaseInput, BaseButton, BaseModal, IconPicker, EmptyState } from '@nav/ui'
 import type { Category } from '@/types'
 import { computeReorderedIds } from '@/utils/helpers'
 
 const categoryStore = useCategoryStore()
 const websiteStore = useWebsiteStore()
+const uiStore = useUIStore()
 
 const categories = computed(() => categoryStore.categories)
 const isAdding = ref(false)
@@ -147,6 +178,13 @@ const newCategoryIcon = ref('fas fa-folder')
 
 const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
+const selectedIds = ref<string[]>([])
+const deleting = ref(false)
+const allSelected = computed(
+  () =>
+    categories.value.length > 0 &&
+    categories.value.every(item => selectedIds.value.includes(item.id))
+)
 
 const editingId = ref<string | null>(null)
 const editingForm = ref({
@@ -158,15 +196,19 @@ const getCategoryCount = (id: string) => {
   return websiteStore.websites.filter(w => w.categoryId === id).length
 }
 
-const handleAddCategory = () => {
+const handleAddCategory = async () => {
   if (!newCategoryName.value.trim()) return
-  categoryStore.addCategory({
-    name: newCategoryName.value.trim(),
-    icon: newCategoryIcon.value
-  })
-  newCategoryName.value = ''
-  newCategoryIcon.value = 'fas fa-folder'
-  isAdding.value = false
+  try {
+    await categoryStore.addCategory({
+      name: newCategoryName.value.trim(),
+      icon: newCategoryIcon.value
+    })
+    newCategoryName.value = ''
+    newCategoryIcon.value = 'fas fa-folder'
+    isAdding.value = false
+  } catch (error) {
+    uiStore.showToast(error instanceof Error ? error.message : '添加分类失败', 'error')
+  }
 }
 
 const cancelAdd = () => {
@@ -188,13 +230,17 @@ const cancelEdit = () => {
   editingForm.value = { name: '', icon: '' }
 }
 
-const handleUpdateCategory = () => {
+const handleUpdateCategory = async () => {
   if (!editingId.value || !editingForm.value.name.trim()) return
-  categoryStore.updateCategory(editingId.value, {
-    name: editingForm.value.name,
-    icon: editingForm.value.icon
-  })
-  editingId.value = null
+  try {
+    await categoryStore.updateCategory(editingId.value, {
+      name: editingForm.value.name,
+      icon: editingForm.value.icon
+    })
+    editingId.value = null
+  } catch (error) {
+    uiStore.showToast(error instanceof Error ? error.message : '更新分类失败', 'error')
+  }
 }
 
 const confirmDelete = (category: Category) => {
@@ -202,15 +248,42 @@ const confirmDelete = (category: Category) => {
   showDeleteModal.value = true
 }
 
-const handleDeleteCategory = () => {
-  if (categoryToDelete.value) {
-    categoryStore.deleteCategory(categoryToDelete.value.id)
-    const websites = websiteStore.websites.filter(w => w.categoryId === categoryToDelete.value?.id)
-    websites.forEach(w => {
-      websiteStore.updateWebsite(w.id, { categoryId: '' })
-    })
+const toggleSelection = (id: string) => {
+  selectedIds.value = selectedIds.value.includes(id)
+    ? selectedIds.value.filter(selectedId => selectedId !== id)
+    : [...selectedIds.value, id]
+}
+
+const toggleSelectAll = () => {
+  selectedIds.value = allSelected.value ? [] : categories.value.map(category => category.id)
+}
+
+const confirmBulkDelete = () => {
+  if (selectedIds.value.length === 0) return
+  categoryToDelete.value = null
+  showDeleteModal.value = true
+}
+
+const handleDeleteCategory = async () => {
+  if (deleting.value) return
+  const ids = categoryToDelete.value ? [categoryToDelete.value.id] : selectedIds.value
+  if (ids.length === 0) return
+  deleting.value = true
+  try {
+    if (categoryToDelete.value) {
+      await categoryStore.deleteCategory(categoryToDelete.value.id)
+    } else {
+      await categoryStore.bulkDeleteCategories(ids)
+    }
+    await websiteStore.initializeData()
+    selectedIds.value = selectedIds.value.filter(id => !ids.includes(id))
     showDeleteModal.value = false
     categoryToDelete.value = null
+    uiStore.showToast(ids.length > 1 ? `已删除 ${ids.length} 个分类` : '分类删除成功', 'success')
+  } catch (error) {
+    uiStore.showToast(error instanceof Error ? error.message : '删除分类失败', 'error')
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -245,7 +318,9 @@ const onDrop = (e: DragEvent, targetCategory: Category) => {
 
   const orderIds = categories.value.map(c => c.id)
   const nextIds = computeReorderedIds(orderIds, draggedItem.value.id, targetCategory.id)
-  categoryStore.reorderCategories(nextIds)
+  void categoryStore.reorderCategories(nextIds).catch(error => {
+    uiStore.showToast(error instanceof Error ? error.message : '分类排序失败', 'error')
+  })
 }
 </script>
 
@@ -266,6 +341,23 @@ const onDrop = (e: DragEvent, targetCategory: Category) => {
   max-height: 400px;
   overflow-y: auto;
   padding: 4px;
+}
+
+.bulk-management {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.select-all,
+.selection-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
 }
 
 .category-list {

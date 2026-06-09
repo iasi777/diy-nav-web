@@ -33,6 +33,33 @@
           @clear-all="clearAllFilters"
         />
 
+        <div v-if="canBulkDelete" class="bulk-toolbar">
+          <BaseButton variant="ghost" size="sm" @click="toggleBulkMode">
+            <i :class="bulkMode ? 'fas fa-times' : 'fas fa-check-square'" />
+            {{ bulkMode ? '退出批量模式' : '批量删除' }}
+          </BaseButton>
+          <template v-if="bulkMode">
+            <label class="select-all">
+              <input
+                type="checkbox"
+                :checked="allCurrentSelected"
+                :disabled="currentResults.length === 0"
+                @change="toggleSelectAllCurrent"
+              />
+              全选当前结果
+            </label>
+            <span class="selected-count">已选 {{ selectedWebsiteIds.length }} 项</span>
+            <BaseButton
+              variant="danger"
+              size="sm"
+              :disabled="selectedWebsiteIds.length === 0"
+              @click="showBulkDeleteConfirm = true"
+            >
+              删除所选
+            </BaseButton>
+          </template>
+        </div>
+
         <!-- Search Results -->
         <div v-if="searchKeyword && !hideSearch" class="search-results-section">
           <div class="results-header">
@@ -49,15 +76,30 @@
             </BaseButton>
           </div>
           <div v-if="searchResults.length > 0" class="website-grid">
-            <WebsiteCard
+            <div
               v-for="site in searchResults"
               :key="site.id"
-              :website="site"
-              @visit="onVisit"
-              @edit="emit('edit', site)"
-              @delete="emit('delete', site.id)"
-              @favorite-toggle="onFavoriteToggle"
-            />
+              class="website-selectable"
+              :class="{ selected: selectedWebsiteIds.includes(site.id) }"
+            >
+              <label v-if="bulkMode" class="website-selector" @click.stop>
+                <input
+                  type="checkbox"
+                  :checked="selectedWebsiteIds.includes(site.id)"
+                  @change="toggleWebsiteSelection(site.id)"
+                />
+              </label>
+              <WebsiteCard
+                :website="site"
+                :clickable="!bulkMode"
+                :show-actions="!bulkMode"
+                :draggable="false"
+                @visit="onVisit"
+                @edit="emit('edit', site)"
+                @delete="emit('delete', site.id)"
+                @favorite-toggle="onFavoriteToggle"
+              />
+            </div>
           </div>
           <EmptyState
             v-else
@@ -73,14 +115,25 @@
             <template #default="{ website }">
               <div
                 class="website-draggable"
-                draggable="true"
-                @dragstart="onDragStart(website.id, $event)"
-                @dragover="onDragOver(website.id, $event)"
-                @drop="onDrop(website.id, $event)"
+                :class="{ selected: selectedWebsiteIds.includes(website.id) }"
+                :draggable="!bulkMode"
+                @dragstart="!bulkMode && onDragStart(website.id, $event)"
+                @dragover="!bulkMode && onDragOver(website.id, $event)"
+                @drop="!bulkMode && onDrop(website.id, $event)"
                 @dragend="onDragEnd"
               >
+                <label v-if="bulkMode" class="website-selector" @click.stop>
+                  <input
+                    type="checkbox"
+                    :checked="selectedWebsiteIds.includes(website.id)"
+                    @change="toggleWebsiteSelection(website.id)"
+                  />
+                </label>
                 <WebsiteCard
                   :website="website"
+                  :clickable="!bulkMode"
+                  :show-actions="!bulkMode"
+                  :draggable="!bulkMode"
                   @visit="onVisit"
                   @edit="emit('edit', website)"
                   @delete="emit('delete', website.id)"
@@ -89,7 +142,7 @@
               </div>
             </template>
 
-            <template v-if="filteredWebsites.length > 0" #add-card>
+            <template v-if="filteredWebsites.length > 0 && !bulkMode" #add-card>
               <div class="add-card" @click="onAddSite">
                 <div class="add-card-content">
                   <div class="add-icon">
@@ -120,6 +173,25 @@
         </EmptyState>
       </main>
     </div>
+
+    <BaseModal
+      :is-open="showBulkDeleteConfirm"
+      title="批量删除网站"
+      size="sm"
+      @close="showBulkDeleteConfirm = false"
+    >
+      <p class="bulk-confirm-text">
+        确定删除已选中的 {{ selectedWebsiteIds.length }} 个网站吗？此操作不可恢复。
+      </p>
+      <template #footer>
+        <div class="bulk-confirm-actions">
+          <BaseButton variant="ghost" @click="showBulkDeleteConfirm = false">取消</BaseButton>
+          <BaseButton variant="danger" :loading="bulkDeleting" @click="confirmBulkDelete">
+            删除
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
@@ -139,11 +211,12 @@
  * @emits manageTags - 打开标签管理
  * @emits manageCategories - 打开分类管理
  */
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import WebsiteCard from '@/components/WebsiteCard.vue'
 import InfiniteWebsiteGrid from '@/components/InfiniteWebsiteGrid.vue'
-import { EmptyState, BaseButton } from '@nav/ui'
+import { EmptyState, BaseButton, BaseModal } from '@nav/ui'
 import { useWebsiteStore } from '@/stores/website'
+import { useUIStore } from '@/stores/ui'
 import { useWebsiteSearch } from '@/composables/useWebsiteSearch'
 import { useWebsiteDrag } from '@/composables/useWebsiteDrag'
 import type { Website } from '@/types'
@@ -165,6 +238,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['edit', 'delete', 'addSite', 'manageTags', 'manageCategories'])
 
 const websiteStore = useWebsiteStore()
+const uiStore = useUIStore()
 
 // 使用组合式函数
 const {
@@ -187,6 +261,19 @@ const { onDragStart, onDragOver, onDrop, onDragEnd } = useWebsiteDrag(() => prop
 const hasActiveFilters = computed(() => {
   return selectedTags.value.length > 0 || selectedCategory.value !== 'all'
 })
+const canBulkDelete = computed(() => props.fixedView === 'all')
+const bulkMode = ref(false)
+const selectedWebsiteIds = ref<string[]>([])
+const showBulkDeleteConfirm = ref(false)
+const bulkDeleting = ref(false)
+const currentResults = computed(() =>
+  searchKeyword.value && !props.hideSearch ? searchResults.value : filteredWebsites.value
+)
+const allCurrentSelected = computed(
+  () =>
+    currentResults.value.length > 0 &&
+    currentResults.value.every(website => selectedWebsiteIds.value.includes(website.id))
+)
 
 const clearAllFilters = () => {
   selectCategory('all')
@@ -199,15 +286,68 @@ const onAddSite = () => {
 }
 
 const onVisit = (website: Website) => {
-  websiteStore.incrementVisitCount(website.id)
+  void websiteStore.incrementVisitCount(website.id)
   window.open(website.url, '_blank', 'noopener,noreferrer')
 }
 
 const onFavoriteToggle = (websiteId: string) => {
   const w = websiteStore.websites.find(x => x.id === websiteId)
   if (!w) return
-  websiteStore.updateWebsite(websiteId, { isFavorite: !w.isFavorite })
+  void websiteStore.updateWebsite(websiteId, { isFavorite: !w.isFavorite }).catch(() => undefined)
 }
+
+const toggleBulkMode = () => {
+  bulkMode.value = !bulkMode.value
+  if (!bulkMode.value) selectedWebsiteIds.value = []
+}
+
+const toggleWebsiteSelection = (id: string) => {
+  selectedWebsiteIds.value = selectedWebsiteIds.value.includes(id)
+    ? selectedWebsiteIds.value.filter(selectedId => selectedId !== id)
+    : [...selectedWebsiteIds.value, id]
+}
+
+const toggleSelectAllCurrent = () => {
+  const currentIds = currentResults.value.map(website => website.id)
+  if (allCurrentSelected.value) {
+    const currentSet = new Set(currentIds)
+    selectedWebsiteIds.value = selectedWebsiteIds.value.filter(id => !currentSet.has(id))
+  } else {
+    selectedWebsiteIds.value = [...new Set([...selectedWebsiteIds.value, ...currentIds])]
+  }
+}
+
+const confirmBulkDelete = async () => {
+  if (selectedWebsiteIds.value.length === 0 || bulkDeleting.value) return
+  bulkDeleting.value = true
+  try {
+    const count = selectedWebsiteIds.value.length
+    await websiteStore.bulkDeleteWebsites(selectedWebsiteIds.value)
+    uiStore.showToast(`已删除 ${count} 个网站`, 'success')
+    selectedWebsiteIds.value = []
+    bulkMode.value = false
+    showBulkDeleteConfirm.value = false
+  } catch (error) {
+    uiStore.showToast(error instanceof Error ? error.message : '批量删除失败', 'error')
+  } finally {
+    bulkDeleting.value = false
+  }
+}
+
+watch(
+  () => websiteStore.websites,
+  current => {
+    const validIds = new Set(current.map(website => website.id))
+    selectedWebsiteIds.value = selectedWebsiteIds.value.filter(id => validIds.has(id))
+  }
+)
+
+watch(canBulkDelete, enabled => {
+  if (!enabled) {
+    bulkMode.value = false
+    selectedWebsiteIds.value = []
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -236,6 +376,32 @@ const onFavoriteToggle = (websiteId: string) => {
   min-width: 0;
 }
 
+.bulk-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1rem;
+  padding: 10px 12px;
+  border: 1px solid var(--border-tile);
+  border-radius: 12px;
+  background-color: var(--bg-panel);
+}
+
+.select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.selected-count {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
 .search-results-section {
   margin-top: 1.5rem;
 }
@@ -260,6 +426,7 @@ const onFavoriteToggle = (websiteId: string) => {
 }
 
 .website-draggable {
+  position: relative;
   cursor: grab;
   min-width: 0; /* Critical for grid/flex overflow */
   width: 100%;
@@ -267,6 +434,48 @@ const onFavoriteToggle = (websiteId: string) => {
   &:active {
     cursor: grabbing;
   }
+
+  &.selected {
+    outline: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+  }
+}
+
+.website-selectable {
+  position: relative;
+  min-width: 0;
+
+  &.selected {
+    outline: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+  }
+}
+
+.website-selector {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background-color: var(--bg-panel);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.bulk-confirm-text {
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.bulk-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
 }
 
 .add-card {
@@ -349,6 +558,13 @@ const onFavoriteToggle = (websiteId: string) => {
     background-color: var(--bg-panel);
     padding: 1rem;
     border-radius: 12px;
+    width: 100%;
+    max-height: none;
+    flex: none;
+  }
+
+  :deep(.filter-content) {
+    overflow: visible;
   }
 
   :deep(.tag-list),

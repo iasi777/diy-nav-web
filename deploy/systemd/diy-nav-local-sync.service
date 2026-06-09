@@ -1,0 +1,8 @@
+[Unit]
+Description=Pull diy-nav backups over Tailscale SSH
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/projects/diy-nav-web/deploy/local-backup-sync.sh

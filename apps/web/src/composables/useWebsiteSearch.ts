@@ -1,5 +1,5 @@
 import { ref, computed, watch, unref, type Ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useWebsiteStore } from '@/stores/website'
 import { useTagStore } from '@/stores/tag'
 import { useCategoryStore } from '@/stores/category'
@@ -24,6 +24,7 @@ export function useWebsiteSearch(fixedViewSource: MaybeRef<FixedViewType>) {
   const categoryStore = useCategoryStore()
   const tagStore = useTagStore()
   const route = useRoute()
+  const router = useRouter()
 
   const searchKeyword = ref('')
   const selectedTags = ref<string[]>([])
@@ -80,13 +81,23 @@ export function useWebsiteSearch(fixedViewSource: MaybeRef<FixedViewType>) {
     const keyword = searchKeyword.value.toLowerCase()
     const scope = fixedView.value ? baseViewWebsites.value : websiteStore.websites
 
-    return scope.filter(
-      website =>
+    return scope.filter(website => {
+      if (selectedCategory.value !== 'all' && website.categoryId !== selectedCategory.value) {
+        return false
+      }
+      if (
+        selectedTags.value.length > 0 &&
+        !website.tagIds.some(tagId => selectedTags.value.includes(tagId))
+      ) {
+        return false
+      }
+      return (
         website.name.toLowerCase().includes(keyword) ||
         website.url.toLowerCase().includes(keyword) ||
         website.description?.toLowerCase().includes(keyword) ||
         getWebsiteTags(website.tagIds).some(tag => tag.name.toLowerCase().includes(keyword))
-    )
+      )
+    })
   })
 
   const getWebsiteTags = (tagIds: string[]) => {
@@ -182,6 +193,28 @@ export function useWebsiteSearch(fixedViewSource: MaybeRef<FixedViewType>) {
   // Watch fixedView changes to re-sync with route (handles navigation between views)
   watch(fixedView, () => {
     syncFiltersFromRoute()
+  })
+
+  watch(categories, current => {
+    if (
+      selectedCategory.value !== 'all' &&
+      !current.some(category => category.id === selectedCategory.value)
+    ) {
+      selectedCategory.value = 'all'
+      void router.replace({
+        query: { ...route.query, category: undefined }
+      })
+    }
+  })
+
+  watch(tags, current => {
+    const validIds = new Set(current.map(tag => tag.id))
+    const next = selectedTags.value.filter(id => validIds.has(id))
+    if (next.length === selectedTags.value.length) return
+    selectedTags.value = next
+    void router.replace({
+      query: { ...route.query, tag: next.length > 0 ? next : undefined }
+    })
   })
 
   return {

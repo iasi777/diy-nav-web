@@ -38,19 +38,6 @@ function loadEnvFiles(): void {
 }
 
 /**
- * 解析 R2 Account ID（从 endpoint 中提取）
- */
-function resolveR2AccountId(config: RawConfig): string {
-  if (config.STORAGE_R2_ACCOUNT_ID) {
-    return config.STORAGE_R2_ACCOUNT_ID
-  }
-
-  const endpoint = config.STORAGE_R2_ENDPOINT || ''
-  const match = endpoint.match(/https:\/\/([^.]+)\.r2\.cloudflarestorage\.com/)
-  return match ? match[1] : ''
-}
-
-/**
  * 加载并验证配置
  * @param forceReload 是否强制重新加载（忽略缓存）
  */
@@ -89,7 +76,6 @@ export function loadRawConfig(forceReload = false): RawConfig {
  */
 export function getConfig() {
   const raw = loadRawConfig()
-  const accountId = resolveR2AccountId(raw)
 
   return {
     server: {
@@ -97,85 +83,18 @@ export function getConfig() {
       env: raw.NODE_ENV,
       appName: raw.APP_NAME
     },
-    auth: {
-      jwtSecret: raw.JWT_SECRET,
-      linuxDo: {
-        clientId: raw.LINUX_DO_CLIENT_ID,
-        clientSecret: raw.LINUX_DO_CLIENT_SECRET,
-        redirectUri: raw.LINUX_DO_REDIRECT_URI
-      },
-      github: {
-        clientId: raw.GITHUB_CLIENT_ID,
-        clientSecret: raw.GITHUB_CLIENT_SECRET,
-        redirectUri: raw.GITHUB_REDIRECT_URI
-      },
-      google: {
-        clientId: raw.GOOGLE_CLIENT_ID,
-        clientSecret: raw.GOOGLE_CLIENT_SECRET,
-        redirectUri: raw.GOOGLE_REDIRECT_URI
-      }
+    localDatabase: {
+      path: raw.DATABASE_PATH,
+      backupDir: raw.BACKUP_DIR
     },
-    storage: {
-      publicProvider: raw.PUBLIC_STORAGE_PROVIDER,
-      backupProvider: raw.BACKUP_STORAGE_PROVIDER,
-      bucket: raw.STORAGE_BUCKET,
-      publicBaseUrl: raw.STORAGE_PUBLIC_BASE_URL,
-      paths: {
-        icons: raw.STORAGE_ICONS_PATH,
-        avatars: raw.STORAGE_AVATARS_PATH,
-        backups: raw.STORAGE_BACKUPS_PATH
-      },
-      s3: {
-        region: raw.STORAGE_S3_REGION,
-        endpoint: raw.STORAGE_S3_ENDPOINT,
-        accessKeyId: raw.STORAGE_S3_ACCESS_KEY_ID,
-        secretAccessKey: raw.STORAGE_S3_SECRET_ACCESS_KEY
-      },
-      r2: {
-        accountId,
-        endpoint: raw.STORAGE_R2_ENDPOINT,
-        accessKeyId: raw.STORAGE_R2_ACCESS_KEY_ID,
-        secretAccessKey: raw.STORAGE_R2_SECRET_ACCESS_KEY
-      },
-      webdav: {
-        url: raw.WEBDAV_URL,
-        username: raw.WEBDAV_USERNAME,
-        password: raw.WEBDAV_PASSWORD,
-        basePath: raw.WEBDAV_BASE_PATH
-      }
-    },
-    database: {
-      d1: {
-        apiToken: raw.DB_D1_API_TOKEN,
-        databaseId: raw.DB_D1_DATABASE_ID
-      }
-    },
-    icon: {
-      size: raw.ICON_SIZE,
-      defaultUrl: raw.ICON_DEFAULT_URL,
-      googleProxyUrl: raw.ICON_GOOGLE_PROXY_URL
-    },
-    backup: {
-      maxRetained: raw.BACKUP_MAX_RETAINED
+    aiGateway: {
+      baseUrl: raw.AI_NEW_API_BASE_URL,
+      apiKey: raw.AI_NEW_API_KEY,
+      defaultModel: raw.AI_DEFAULT_MODEL
     },
     log: {
       level: raw.LOG_LEVEL,
       headers: raw.LOG_HEADERS
-    },
-    // Cloudflare 组合配置（便捷访问）
-    cloudflare: {
-      accountId,
-      apiToken: raw.DB_D1_API_TOKEN || '',
-      d1DatabaseId: raw.DB_D1_DATABASE_ID || ''
-    },
-    // R2 组合配置（便捷访问）
-    r2: {
-      accessKeyId: raw.STORAGE_R2_ACCESS_KEY_ID || '',
-      secretAccessKey: raw.STORAGE_R2_SECRET_ACCESS_KEY || '',
-      bucketName: raw.STORAGE_BUCKET || '',
-      publicUrlBase:
-        raw.STORAGE_PUBLIC_BASE_URL ||
-        `https://${raw.STORAGE_BUCKET}.${accountId}.r2.cloudflarestorage.com`
     }
   }
 }

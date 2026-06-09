@@ -12,30 +12,9 @@ import router from './router'
 
 const app = createApp(App)
 
-import { request } from '@/utils/http'
-import { useAuthStore } from '@/stores/auth'
-
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
-
-// Setup global http interceptors
-request.onUnauthorized(() => {
-  const authStore = useAuthStore()
-  authStore.logout()
-  router.push('/login')
-})
-
-request.onTokenRefreshed(newToken => {
-  const authStore = useAuthStore()
-  authStore.setToken(newToken)
-})
-
-// 应用启动时验证 token 并刷新用户信息
-const authStore = useAuthStore()
-if (authStore.isAuthenticated) {
-  authStore.fetchUser()
-}
 
 const settingsStore = useSettingsStore()
 const websiteStore = useWebsiteStore()
@@ -43,8 +22,14 @@ const categoryStore = useCategoryStore()
 const tagStore = useTagStore()
 
 settingsStore.loadSettings()
-websiteStore.initializeData()
-categoryStore.initializeData()
-tagStore.initializeData()
 
-app.mount('#app')
+async function bootstrap() {
+  await Promise.allSettled([
+    websiteStore.initializeData(),
+    categoryStore.initializeData(),
+    tagStore.initializeData()
+  ])
+  app.mount('#app')
+}
+
+void bootstrap()

@@ -8,6 +8,9 @@
     @drop="onDrop"
     @dragend="onDragEnd"
   >
+    <label v-if="selectable" class="selection-checkbox" @click.stop>
+      <input type="checkbox" :checked="selected" @change="$emit('select')" />
+    </label>
     <div v-if="editing" class="edit-row">
       <BaseInput
         v-model="name"
@@ -51,12 +54,26 @@ import { ref, watchEffect } from 'vue'
 import { BaseInput, ColorPicker } from '@nav/ui'
 import type { Tag } from '@/types'
 
-const props = defineProps<{ tag: Tag; editing: boolean; usageCount: number; updating: boolean }>()
+const props = withDefaults(
+  defineProps<{
+    tag: Tag
+    editing: boolean
+    usageCount: number
+    updating: boolean
+    selectable?: boolean
+    selected?: boolean
+  }>(),
+  {
+    selectable: false,
+    selected: false
+  }
+)
 const emit = defineEmits<{
   (e: 'edit'): void
   (e: 'delete'): void
   (e: 'save', payload: { name: string; color: string }): void
   (e: 'cancel'): void
+  (e: 'select'): void
   (e: 'dragstart', id: string): void
   (e: 'drop', id: string): void
 }>()
@@ -95,6 +112,9 @@ const onDrop = () => {
 @use '@/styles/variables' as *;
 
 .tag-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background-color: var(--bg-panel);
   border: 1px solid var(--border-tile);
   border-radius: 12px;
@@ -130,6 +150,13 @@ const onDrop = () => {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.selection-checkbox {
+  display: inline-flex;
+  cursor: pointer;
 }
 
 .drag-handle {

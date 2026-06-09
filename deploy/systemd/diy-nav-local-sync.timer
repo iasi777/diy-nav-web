@@ -1,0 +1,10 @@
+[Unit]
+Description=Pull diy-nav backups daily when this workstation is online
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=1d
+Persistent=true
+
+[Install]
+WantedBy=timers.target

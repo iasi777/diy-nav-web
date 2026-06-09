@@ -6,12 +6,12 @@
  * ```typescript
  * import { config } from '@nav/config'
  * config.server.port
- * config.auth.jwtSecret
+ * config.localDatabase.path
  * ```
  *
  * 或按需导入:
  * ```typescript
- * import { getServerConfig, getAuthConfig } from '@nav/config'
+ * import { getServerConfig } from '@nav/config'
  * const server = getServerConfig()
  * ```
  */

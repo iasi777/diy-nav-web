@@ -1,0 +1,9 @@
+[Unit]
+Description=Create diy-nav SQLite and JSON backups
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/diy-nav-web/deploy
+ExecStart=/opt/diy-nav-web/deploy/backup.sh

@@ -4,7 +4,6 @@
       @add-site="handleAddSite"
       @open-settings="openSettingsModal"
       @open-data-management="openDataManagement"
-      @open-ai-settings="openAISettings"
     />
     <main class="main-content">
       <div class="container">
@@ -63,16 +62,6 @@
       <DataManagementModal @close="() => uiStore.closeModal('dataManagement')" />
     </BaseModal>
 
-    <BaseModal
-      v-if="uiStore.modalState.aiSettings"
-      :is-open="uiStore.modalState.aiSettings"
-      title="AI 配置"
-      size="lg"
-      @close="() => uiStore.closeModal('aiSettings')"
-    >
-      <AIConfigModal @close="() => uiStore.closeModal('aiSettings')" />
-    </BaseModal>
-
     <ToastContainer />
 
     <!-- Sync Loading Indicator -->
@@ -109,7 +98,6 @@ import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal.vue
 import ManageTagsModal from '@/components/modals/ManageTagsModal.vue'
 import SettingsModal from '@/components/modals/SettingsModal.vue'
 import DataManagementModal from '@/components/modals/DataManagementModal.vue'
-import AIConfigModal from '@/components/modals/AIConfigModal.vue'
 import ToastContainer from '@/components/toast/ToastContainer.vue'
 
 const uiStore = useUIStore()
@@ -129,7 +117,6 @@ const closeAddSite = () => {
 
 const openSettingsModal = () => uiStore.openModal('settings')
 const openDataManagement = () => uiStore.openModal('dataManagement')
-const openAISettings = () => uiStore.openModal('aiSettings')
 
 // Sync State Management with "Success" feedback
 type SyncState = 'hidden' | 'syncing' | 'success'

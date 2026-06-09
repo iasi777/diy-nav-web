@@ -1,121 +1,73 @@
+import { computed, readonly, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, computed, readonly } from 'vue'
 import type { Tag } from '@/types'
-import { generateId } from '@/utils/helpers'
+import { libraryApi } from '@/api/library'
 
 const TAG_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6B7280']
 
 export const useTagStore = defineStore('tag', () => {
   const tags = ref<Tag[]>([])
-
-  const initializeData = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('tags') || '[]')
-      if (Array.isArray(saved)) {
-        tags.value = saved.map(item => ({
-          ...item,
-          createdAt: new Date(item.createdAt),
-          updatedAt: new Date(item.updatedAt)
-        }))
-      } else {
-        tags.value = []
-      }
-    } catch {
-      tags.value = []
-    }
-  }
-
   const tagColors = computed(() => TAG_COLORS)
 
-  const addTag = (tagData: Pick<Tag, 'name' | 'color'>) => {
-    const nameLower = tagData.name.trim().toLowerCase()
-    if (tags.value.some(t => t.name.trim().toLowerCase() === nameLower))
-      throw new Error('DUPLICATE_NAME')
-    const now = new Date()
-    const newTag: Tag = {
-      ...tagData,
-      id: generateId(),
-      order: tags.value.length,
-      usageCount: 0,
-      createdAt: now,
-      updatedAt: now
-    }
-    tags.value.push(newTag)
-    saveToLocalStorage()
-    return newTag
+  const initializeData = async () => {
+    tags.value = await libraryApi.listTags()
   }
-
-  const updateTag = (id: string, updates: Partial<Tag>) => {
-    const index = tags.value.findIndex(tag => tag.id === id)
-    if (index !== -1) {
-      if (updates.name) {
-        const nameLower = updates.name.trim().toLowerCase()
-        const dup = tags.value.some(t => t.id !== id && t.name.trim().toLowerCase() === nameLower)
-        if (dup) throw new Error('DUPLICATE_NAME')
-      }
-      tags.value[index] = { ...tags.value[index], ...updates, updatedAt: new Date() }
-      saveToLocalStorage()
-    }
+  const addTag = async (input: Pick<Tag, 'name' | 'color'>) => {
+    const created = await libraryApi.createTag(input)
+    tags.value = [...tags.value, created]
+    return created
   }
-
-  const deleteTag = (id: string) => {
-    const index = tags.value.findIndex(tag => tag.id === id)
-    if (index !== -1) {
-      tags.value.splice(index, 1)
-      saveToLocalStorage()
-    }
-  }
-
-  const reorderTags = (newOrder: string[]) => {
-    newOrder.forEach((tagId, newIndex) => {
-      const tag = tags.value.find(t => t.id === tagId)
-      if (tag) tag.order = newIndex
-    })
-    saveToLocalStorage()
-  }
-
-  const getTagById = (id: string) => tags.value.find(tag => tag.id === id)
-
-  const saveToLocalStorage = () => {
+  const updateTag = async (id: string, updates: Partial<Tag>) => {
+    const current = tags.value.find(item => item.id === id)
+    if (!current) return undefined
     try {
-      localStorage.setItem('tags', JSON.stringify(tags.value))
-    } catch {
-      void 0
+      const updated = await libraryApi.updateTag(id, current.version, updates)
+      tags.value = tags.value.map(item => (item.id === id ? updated : item))
+      return updated
+    } catch (error) {
+      await initializeData()
+      throw error
     }
   }
-
-  const clearAllTags = () => {
-    tags.value = []
-    localStorage.removeItem('tags')
+  const deleteTag = async (id: string) => {
+    await bulkDeleteTags([id])
   }
-
-  const overwriteTags = (data: Partial<Tag>[]) => {
-    if (Array.isArray(data)) {
-      const now = new Date()
-      tags.value = data.map((t: Partial<Tag>) => ({
-        id: t.id || generateId(),
-        name: t.name || '',
-        color: t.color || TAG_COLORS[0],
-        order: typeof t.order === 'number' ? t.order : 0,
-        usageCount: typeof t.usageCount === 'number' ? t.usageCount : 0,
-        createdAt: t.createdAt ? new Date(t.createdAt) : now,
-        updatedAt: t.updatedAt ? new Date(t.updatedAt) : now
-      }))
-      saveToLocalStorage()
+  const bulkDeleteTags = async (ids: string[]) => {
+    const selected = tags.value.filter(item => ids.includes(item.id))
+    if (selected.length === 0) return
+    try {
+      await libraryApi.bulkDeleteTags(
+        selected.map(item => ({ id: item.id, version: item.version }))
+      )
+      const deletedIds = new Set(selected.map(item => item.id))
+      tags.value = tags.value.filter(item => !deletedIds.has(item.id))
+    } catch (error) {
+      await initializeData()
+      throw error
     }
   }
+  const reorderTags = async (ids: string[]) => {
+    const items = ids
+      .map(id => tags.value.find(item => item.id === id))
+      .filter((item): item is Tag => Boolean(item))
+    try {
+      tags.value = await libraryApi.reorderTags(items)
+    } catch (error) {
+      await initializeData()
+      throw error
+    }
+  }
+  const getTagById = (id: string) => tags.value.find(item => item.id === id)
 
   return {
     tags: readonly(tags),
     tagColors,
+    initializeData,
     addTag,
     updateTag,
     deleteTag,
+    bulkDeleteTags,
     reorderTags,
-    getTagById,
-    saveToLocalStorage,
-    clearAllTags,
-    initializeData,
-    overwriteTags
+    getTagById
   }
 })

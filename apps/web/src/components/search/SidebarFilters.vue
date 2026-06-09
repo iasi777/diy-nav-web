@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar-filters">
     <!-- Tags Section -->
-    <div class="filter-group">
+    <div class="filter-group tags-group">
       <div class="filter-header">
         <label class="filter-label">标签</label>
         <button class="manage-btn" @click="$emit('manageTags')">
@@ -9,31 +9,33 @@
         </button>
       </div>
 
-      <div v-if="tags.length === 0" class="sidebar-empty-state">
-        <p class="empty-desc-text">添加网站并打上标签后，你可以在这里按标签快速筛选。</p>
-        <div class="tag-list disabled">
-          <span class="tag-pill example">示例：GitHub</span>
-          <span class="tag-pill example">示例：云服务</span>
-          <span class="tag-pill example">示例：AI</span>
+      <div class="filter-content">
+        <div v-if="tags.length === 0" class="sidebar-empty-state">
+          <p class="empty-desc-text">添加网站并打上标签后，你可以在这里按标签快速筛选。</p>
+          <div class="tag-list disabled">
+            <span class="tag-pill example">示例：GitHub</span>
+            <span class="tag-pill example">示例：云服务</span>
+            <span class="tag-pill example">示例：AI</span>
+          </div>
+          <button class="create-first-btn" @click="$emit('manageTags')">创建第一个标签</button>
         </div>
-        <button class="create-first-btn" @click="$emit('manageTags')">创建第一个标签</button>
-      </div>
 
-      <div v-else class="tag-list">
-        <button
-          v-for="tag in tags"
-          :key="tag.id"
-          class="tag-pill"
-          :class="{ active: selectedTags.includes(tag.id) }"
-          @click="$emit('toggleTag', tag.id)"
-        >
-          {{ tag.name }}
-        </button>
+        <div v-else class="tag-list">
+          <button
+            v-for="tag in tags"
+            :key="tag.id"
+            class="tag-pill"
+            :class="{ active: selectedTags.includes(tag.id) }"
+            @click="$emit('toggleTag', tag.id)"
+          >
+            {{ tag.name }}
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Categories Section -->
-    <div class="filter-group">
+    <div class="filter-group categories-group">
       <div class="filter-header">
         <label class="filter-label">分类</label>
         <button class="manage-btn" @click="$emit('manageCategories')">
@@ -41,40 +43,44 @@
         </button>
       </div>
 
-      <div v-if="categories.length === 0" class="sidebar-empty-state">
-        <p class="empty-desc-text">
-          为网站创建分类后，你可以在这里切换查看「云服务商」「在线工具」「博客论坛」等分组。
-        </p>
-        <div class="category-list">
-          <button class="category-item active" @click="$emit('selectCategory', 'all')">
-            <span class="category-name">全部 (0)</span>
+      <div class="filter-content">
+        <div v-if="categories.length === 0" class="sidebar-empty-state">
+          <p class="empty-desc-text">
+            为网站创建分类后，你可以在这里切换查看「云服务商」「在线工具」「博客论坛」等分组。
+          </p>
+          <div class="category-list">
+            <button class="category-item active" @click="$emit('selectCategory', 'all')">
+              <span class="category-name">全部 (0)</span>
+            </button>
+          </div>
+          <div class="tag-list disabled">
+            <span class="tag-pill example">示例：云服务商</span>
+            <span class="tag-pill example">示例：在线工具</span>
+            <span class="tag-pill example">示例：博客论坛</span>
+          </div>
+          <button class="create-first-btn" @click="$emit('manageCategories')">
+            创建第一个分类
           </button>
         </div>
-        <div class="tag-list disabled">
-          <span class="tag-pill example">示例：云服务商</span>
-          <span class="tag-pill example">示例：在线工具</span>
-          <span class="tag-pill example">示例：博客论坛</span>
-        </div>
-        <button class="create-first-btn" @click="$emit('manageCategories')">创建第一个分类</button>
-      </div>
 
-      <div v-else class="category-list">
-        <button
-          class="category-item"
-          :class="{ active: selectedCategory === 'all' }"
-          @click="$emit('selectCategory', 'all')"
-        >
-          <span class="category-name">全部</span>
-        </button>
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          class="category-item"
-          :class="{ active: selectedCategory === category.id }"
-          @click="$emit('selectCategory', category.id)"
-        >
-          <span class="category-name">{{ category.name }}</span>
-        </button>
+        <div v-else class="category-list">
+          <button
+            class="category-item"
+            :class="{ active: selectedCategory === 'all' }"
+            @click="$emit('selectCategory', 'all')"
+          >
+            <span class="category-name">全部</span>
+          </button>
+          <button
+            v-for="category in categories"
+            :key="category.id"
+            class="category-item"
+            :class="{ active: selectedCategory === category.id }"
+            @click="$emit('selectCategory', category.id)"
+          >
+            <span class="category-name">{{ category.name }}</span>
+          </button>
+        </div>
       </div>
     </div>
   </aside>
@@ -112,68 +118,31 @@ defineEmits<{
   position: sticky;
   top: 80px; // Header (64px) + gap (16px)
   max-height: calc(100vh - 80px - 1rem);
-  overflow: hidden auto;
+  overflow: hidden;
   z-index: 90;
+}
 
-  // 优化的滚动条样式 - 只在需要时显示
+.filter-content {
+  min-height: 0;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 
-  // 悬停时显示滚动条
   &:hover {
-    scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
   }
 
   &::-webkit-scrollbar {
     width: 6px;
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
   &::-webkit-scrollbar-thumb {
     background-color: transparent;
     border-radius: 10px;
-    transition: background-color 0.2s ease;
-  }
-
-  // 悬停时显示滚动条
-  &:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.08);
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.15);
-    }
-
-    &:active {
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-  }
-}
-
-// 暗色主题侧边栏滚动条
-:global([data-theme='dark']) .sidebar-filters {
-  scrollbar-color: transparent transparent;
-
-  &:hover {
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.18);
-    }
-
-    &:active {
-      background-color: rgba(255, 255, 255, 0.25);
-    }
+    background-color: rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -181,6 +150,26 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-height: 0;
+}
+
+.tags-group {
+  flex: 0 1 40%;
+  max-height: 40%;
+}
+
+.categories-group {
+  flex: 1 1 auto;
+}
+
+:global([data-theme='dark']) .filter-content {
+  &:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
 }
 
 .filter-header {

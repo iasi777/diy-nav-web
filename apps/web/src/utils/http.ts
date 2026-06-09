@@ -8,7 +8,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787'
-// Use 30s timeout to accommodate slow external OAuth API calls
+// Allow slower private-network API operations such as large import previews.
 const TIMEOUT = 30000
 
 interface RequestOptions extends RequestInit {
@@ -19,12 +19,7 @@ interface RequestOptions extends RequestInit {
   keepalive?: boolean
 }
 
-type UnauthorizedHandler = () => void
-type TokenRefreshedHandler = (token: string) => void
-
 class HttpClient {
-  private unauthorizedHandlers: UnauthorizedHandler[] = []
-  private tokenRefreshedHandlers: TokenRefreshedHandler[] = []
   private defaultTimeout: number
 
   constructor(
@@ -32,22 +27,6 @@ class HttpClient {
     timeout = TIMEOUT
   ) {
     this.defaultTimeout = timeout
-  }
-
-  public onUnauthorized(handler: UnauthorizedHandler) {
-    this.unauthorizedHandlers.push(handler)
-  }
-
-  public onTokenRefreshed(handler: TokenRefreshedHandler) {
-    this.tokenRefreshedHandlers.push(handler)
-  }
-
-  private handleUnauthorized() {
-    this.unauthorizedHandlers.forEach(handler => handler())
-  }
-
-  private handleTokenRefreshed(token: string) {
-    this.tokenRefreshedHandlers.forEach(handler => handler(token))
   }
 
   private async fetchWithTimeout(
@@ -66,11 +45,7 @@ class HttpClient {
   }
 
   private getHeaders(options: RequestOptions): HeadersInit {
-    const token = localStorage.getItem('auth_token')
-
-    // Default headers
     const headers: Record<string, string> = {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers as Record<string, string>)
     }
 
@@ -110,19 +85,7 @@ class HttpClient {
         const headers = this.getHeaders(options)
         const response = await this.fetchWithTimeout(url, { ...init, headers })
 
-        // Constants
-        const TOKEN_HEADER_NAME = 'x-nav-token'
-
-        // ...
-        // Auto-renew token from header
-        const newToken = response.headers.get(TOKEN_HEADER_NAME)
-        if (newToken) {
-          localStorage.setItem('auth_token', newToken)
-          this.handleTokenRefreshed(newToken)
-        }
-
         if (response.status === 401) {
-          this.handleUnauthorized()
           return {
             success: false,
             message: 'Unauthorized',

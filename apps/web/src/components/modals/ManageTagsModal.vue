@@ -3,6 +3,22 @@
     <div class="modal-content-wrapper">
       <!-- 标签列表 -->
       <div class="tag-list-container">
+        <div v-if="tags.length > 0" class="bulk-management">
+          <label class="select-all">
+            <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
+            全选
+          </label>
+          <span>已选 {{ selectedIds.length }} 项</span>
+          <BaseButton
+            variant="danger"
+            size="sm"
+            :disabled="selectedIds.length === 0"
+            @click="openBulkDeleteConfirm"
+          >
+            批量删除
+          </BaseButton>
+        </div>
+
         <!-- 空状态 -->
         <EmptyState
           v-if="tags.length === 0"
@@ -20,6 +36,9 @@
             :editing="editingId === tag.id"
             :usage-count="getWebsiteCount(tag.id)"
             :updating="updating"
+            selectable
+            :selected="selectedIds.includes(tag.id)"
+            @select="toggleSelection(tag.id)"
             @edit="startEdit(tag)"
             @delete="handleDeleteTag(tag)"
             @save="handleSave"
@@ -67,11 +86,20 @@
     </div>
 
     <!-- Delete Confirmation -->
-    <BaseModal :is-open="deleteConfirmOpen" title="删除标签" size="sm" @close="closeDeleteConfirm">
+    <BaseModal
+      :is-open="deleteConfirmOpen"
+      :title="deleteTargetId ? '删除标签' : '批量删除标签'"
+      size="sm"
+      @close="closeDeleteConfirm"
+    >
       <p class="delete-confirm-text">
-        确定要删除标签“{{ tags.find(t => t.id === deleteTargetId)?.name }}”吗？
+        {{
+          deleteTargetId
+            ? `确定要删除标签“${tags.find(t => t.id === deleteTargetId)?.name}”吗？`
+            : `确定要删除选中的 ${selectedIds.length} 个标签吗？`
+        }}
         <br />
-        <span class="text-danger">此操作不可恢复。</span>
+        <span class="text-danger">网站会保留，仅解除这些标签关联。此操作不可恢复。</span>
       </p>
       <template #footer>
         <div class="modal-footer-actions">
@@ -116,6 +144,10 @@ const updating = ref(false)
 
 // 计算属性
 const tags = computed(() => tagStore.tags)
+const selectedIds = ref<string[]>([])
+const allSelected = computed(
+  () => tags.value.length > 0 && tags.value.every(tag => selectedIds.value.includes(tag.id))
+)
 
 const sortedTags = computed(() => {
   return [...tags.value].sort((a, b) => a.order - b.order)
@@ -129,7 +161,9 @@ const onDrop = (targetId: string) => {
   if (!draggingId.value) return
   const orderIds = sortedTags.value.map(t => t.id)
   const nextIds = computeReorderedIds(orderIds, draggingId.value, targetId)
-  tagStore.reorderTags(nextIds)
+  void tagStore.reorderTags(nextIds).catch(() => {
+    uiStore.showToast('标签排序失败', 'error')
+  })
   draggingId.value = null
 }
 
@@ -154,7 +188,7 @@ const handleAddTag = async () => {
       uiStore.showToast('标签名称已存在', 'warning')
       return
     }
-    tagStore.addTag({
+    await tagStore.addTag({
       name: newTag.value.name.trim(),
       color: newTag.value.color
     })
@@ -195,7 +229,7 @@ const startEdit = (tag: Tag) => {
 }
 
 // 处理更新标签
-const handleSave = (payload: { name: string; color: string }) => {
+const handleSave = async (payload: { name: string; color: string }) => {
   if (!editingId.value || updating.value) return
   const name = payload.name.trim()
   const color = payload.color
@@ -210,7 +244,7 @@ const handleSave = (payload: { name: string; color: string }) => {
 
   updating.value = true
   try {
-    tagStore.updateTag(editingId.value, { name, color })
+    await tagStore.updateTag(editingId.value, { name, color })
     uiStore.showToast('标签更新成功', 'success')
     cancelEdit()
   } catch (error) {
@@ -231,13 +265,6 @@ const cancelEdit = () => {
 
 // 处理删除标签
 const handleDeleteTag = (tag: Tag) => {
-  const websiteCount = getWebsiteCount(tag.id)
-
-  if (websiteCount > 0) {
-    uiStore.showToast(`该标签下还有 ${websiteCount} 个网站，请先移除或删除这些网站`, 'warning')
-    return
-  }
-
   deleteTargetId.value = tag.id
   deleteConfirmOpen.value = true
 }
@@ -251,15 +278,36 @@ const closeDeleteConfirm = () => {
   deleteTargetId.value = ''
 }
 
-const confirmDeleteTag = () => {
-  if (!deleteTargetId.value || deleting.value) return
+const toggleSelection = (id: string) => {
+  selectedIds.value = selectedIds.value.includes(id)
+    ? selectedIds.value.filter(selectedId => selectedId !== id)
+    : [...selectedIds.value, id]
+}
+
+const toggleSelectAll = () => {
+  selectedIds.value = allSelected.value ? [] : sortedTags.value.map(tag => tag.id)
+}
+
+const openBulkDeleteConfirm = () => {
+  if (selectedIds.value.length === 0) return
+  deleteTargetId.value = ''
+  deleteConfirmOpen.value = true
+}
+
+const confirmDeleteTag = async () => {
+  if (deleting.value) return
+  const ids = deleteTargetId.value ? [deleteTargetId.value] : selectedIds.value
+  if (ids.length === 0) return
   deleting.value = true
   try {
-    tagStore.deleteTag(deleteTargetId.value)
-    uiStore.showToast('标签删除成功', 'success')
+    if (deleteTargetId.value) await tagStore.deleteTag(deleteTargetId.value)
+    else await tagStore.bulkDeleteTags(ids)
+    await websiteStore.initializeData()
+    selectedIds.value = selectedIds.value.filter(id => !ids.includes(id))
+    uiStore.showToast(ids.length > 1 ? `已删除 ${ids.length} 个标签` : '标签删除成功', 'success')
     closeDeleteConfirm()
-  } catch {
-    uiStore.showToast('删除失败，请重试', 'error')
+  } catch (error) {
+    uiStore.showToast(error instanceof Error ? error.message : '删除失败，请重试', 'error')
   } finally {
     deleting.value = false
   }
@@ -284,6 +332,22 @@ const confirmDeleteTag = () => {
   max-height: 400px;
   overflow-y: auto;
   padding: 4px;
+}
+
+.bulk-management {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
 }
 
 .tag-list {

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-REMOTE="${DIY_NAV_REMOTE:-root@100.87.23.114}"
+REMOTE="${DIY_NAV_REMOTE:-ubuntu@100.87.23.114}"
 DEST="${DIY_NAV_LOCAL_BACKUP_DIR:-$HOME/backups/diy-nav}"
 mkdir -p "$DEST"
 

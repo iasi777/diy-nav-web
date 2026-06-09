@@ -93,11 +93,23 @@ AI_DEFAULT_MODEL=
 
 目标地址固定为 `100.87.23.114:8090`。`8080` 和 `8787` 不会占用宿主机端口。
 
+全新 VPS 首次部署（需 Node 20 + Docker）：
+
 ```bash
+# 1. 克隆 fork（私有分支）
+git clone https://github.com/iasi777/diy-nav-web.git
+cd diy-nav-web
+
+# 2. 配置环境变量（填写 new-api 地址与 Key、Tailscale IP）
 cp .env.example .env
 chmod 600 .env
+
+# 3. 构建并启动（脚本内部用 docker compose --build）
 sh deploy/deploy.sh
 ```
+
+> better-sqlite3 在 Node 20 Debian slim 镜像内编译，自动适配 x86_64/ARM64，宿主机无需安装 Node。
+> 注意：修改 `.env` 后需 `docker compose down && up` 重建容器才能加载新环境变量，`restart` 不会刷新。
 
 Compose 行为：
 
@@ -130,6 +142,8 @@ sh deploy/backup.sh
 容器内 `/backups` 只保留最近 12 组文件。安装 VPS 定时器后，每月 1 日和 16 日执行：
 
 ```bash
+# service 文件引用 /opt/diy-nav-web，先建软链接指向项目根（缺少会报 203/EXEC）
+sudo ln -sfn "$(pwd)" /opt/diy-nav-web
 sudo cp deploy/systemd/diy-nav-backup.* /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now diy-nav-backup.timer
@@ -144,10 +158,10 @@ docker exec diy-nav-api ls -lh /backups
 
 ## 本地副本
 
-脚本通过 Tailscale SSH 从容器拉取备份，并在本地保留 12 组：
+脚本通过 Tailscale SSH 从容器拉取备份，并在本地保留 12 组。`DIY_NAV_REMOTE` 默认 `ubuntu@100.87.23.114`，按实际 VPS 用户调整：
 
 ```bash
-DIY_NAV_REMOTE=root@100.87.23.114 sh deploy/local-backup-sync.sh
+DIY_NAV_REMOTE=ubuntu@100.87.23.114 sh deploy/local-backup-sync.sh
 ```
 
 安装 user timer：

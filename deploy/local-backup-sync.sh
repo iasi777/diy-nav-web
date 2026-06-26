@@ -7,10 +7,10 @@ mkdir -p "$DEST"
 
 tailscale ssh "$REMOTE" "docker exec diy-nav-api tar -C /backups -cf - ." | tar -C "$DEST" -xf -
 
-find "$DEST" -type f -name 'diy-nav-*.sqlite' -printf '%T@ %p\n' \
-  | sort -nr \
-  | awk 'NR > 12 { print $2 }' \
-  | while IFS= read -r snapshot; do
-      base=${snapshot%.sqlite}
-      rm -f "$base.sqlite" "$base.json" "$base.sha256"
-    done
+find "$DEST" -type f -name 'diy-nav-*.sqlite' -printf '%T@ %p\n' |
+  sort -nr |
+  awk 'NR > 12 { print $2 }' |
+  while IFS= read -r snapshot; do
+    base=${snapshot%.sqlite}
+    rm -f "$base.sqlite" "$base.json" "$base.sha256"
+  done
